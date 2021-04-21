@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 Vue.use(Vuex)
 
 const TOKEN='SpeckleDemo.AuthToken'
@@ -25,20 +24,9 @@ export default new Vuex.Store({
   },
   actions: {
     logout(context) {
-      fetch('http:localhost:3000/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          token: localStorage.getItem(TOKEN),
-          refreshToken: localStorage.getItem(REFRESH_TOKEN)
-        })
-      }).then( () => {
         context.commit("setUser", null)
         localStorage.removeItem( TOKEN )
         localStorage.removeItem( REFRESH_TOKEN )
-      })
     },
     async exchangeAccessCode(context, accessCode) {
       console.log('VUEX - Access code exchange', accessCode)

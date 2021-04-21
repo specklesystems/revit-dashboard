@@ -28,6 +28,7 @@
       <v-spacer></v-spacer>
 
       <v-btn
+          v-if="!isAuthenticated"
         href="https://github.com/vuetifyjs/vuetify/releases/latest"
         target="_blank"
         text
@@ -35,6 +36,7 @@
         <span class="mr-2">Login with Speckle</span>
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
+      <v-btn v-else @click="$store.dispatch('logout')">Log out</v-btn>
     </v-app-bar>
 
     <v-main>
@@ -56,5 +58,8 @@ export default {
   data: () => ({
     //
   }),
+  computed: {
+    isAuthenticated() { return this.$store.state.user != null}
+  }
 };
 </script>

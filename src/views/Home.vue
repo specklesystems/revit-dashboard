@@ -1,7 +1,7 @@
 <template lang="html">
   <div class="home">
     <v-btn @click="this.authRedirect">Login with Speckle</v-btn>
-    <p>{{ this.$store.state.user }}</p>
+    <p>{{ isAuthenticated }}</p>
     <p>{{ this.$store.state.serverInfo }}</p>
   </div>
 </template>
@@ -24,6 +24,7 @@ export default {
     },
   },
   computed: {
+    isAuthenticated() { return this.$store.state.user != null}
   }
 }
 </script>
