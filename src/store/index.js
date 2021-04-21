@@ -24,9 +24,10 @@ export default new Vuex.Store({
   },
   actions: {
     logout(context) {
-        context.commit("setUser", null)
-        localStorage.removeItem( TOKEN )
-        localStorage.removeItem( REFRESH_TOKEN )
+      context.commit("setUser", null)
+      context.commit("setServerInfo", null)
+      localStorage.removeItem( TOKEN )
+      localStorage.removeItem( REFRESH_TOKEN )
     },
     async exchangeAccessCode(context, accessCode) {
       console.log('VUEX - Access code exchange', accessCode)
@@ -63,7 +64,7 @@ export default new Vuex.Store({
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({query: '{ user { name } }'})
+          body: JSON.stringify({query: '{ user { name }, serverInfo { name company } }'})
         })
 
         let data = (await testResponse.json()).data
@@ -72,24 +73,7 @@ export default new Vuex.Store({
           console.log("Got user!", data.user)
           context.commit("setUser", data.user)
         }
-      }
-    },
-    async getServerInfo(context){
-      let token = localStorage.getItem(TOKEN)
-      if (token) {
-        let testResponse = await fetch('http://localhost:3000/graphql', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({query: '{ serverInfo { name company } }'})
-        })
-
-        let data = (await testResponse.json()).data
-        // if res.data.user is non null, means the ping was ok & token is valid
-        if (data.serverInfo) {
-          console.log(data.serverInfo)
+        if (data.serverInfo){
           context.commit("setServerInfo", data.serverInfo)
         }
       }

@@ -1,8 +1,8 @@
 <template lang="html">
   <div class="home">
-    <v-btn @click="this.authRedirect">Login with Speckle</v-btn>
-    <p>{{ isAuthenticated }}</p>
-    <p>{{ this.$store.state.serverInfo }}</p>
+    <div v-if="!$store.getters.isAuthenticated">
+      You are not logged in!
+    </div>
   </div>
 </template>
 
@@ -11,20 +11,12 @@
 export default {
   name: 'Home',
   async mounted() {
-    await this.$store.dispatch("getServerInfo")
   },
   data: () => {
-    return {
-
-    }
+    return {}
   },
-  methods: {
-    authRedirect() {
-      this.$store.dispatch("redirectToAuth")
-    },
-  },
+  methods: {},
   computed: {
-    isAuthenticated() { return this.$store.state.user != null}
   }
 }
 </script>
