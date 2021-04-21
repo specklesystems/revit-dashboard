@@ -1,6 +1,8 @@
 <template lang="html">
   <div class="home">
-    <button @click="this.authRedirect">Login with Speckle</button>
+    <v-btn @click="this.authRedirect">Login with Speckle</v-btn>
+    <p>{{ this.$store.state.user }}</p>
+    <p>{{ this.$store.state.serverInfo }}</p>
   </div>
 </template>
 
@@ -9,19 +11,19 @@
 export default {
   name: 'Home',
   async mounted() {
-    console.log(process.env.VUE_APP_SPECKLE_ID)
-    console.log(process.env.VUE_APP_SPECKLE_SECRET)
+    await this.$store.dispatch("getServerInfo")
   },
   data: () => {
     return {
-      appid: process.env.VUE_APP_SPECKLE_ID || "",
-      challenge: process.env.VUE_APP_SPECKLE_SECRET || ""
+
     }
   },
   methods: {
     authRedirect() {
-      window.location = `https://speckle.xyz/authn/verify/${this.appid}/${this.challenge}`
-    }
+      this.$store.dispatch("redirectToAuth")
+    },
+  },
+  computed: {
   }
 }
 </script>

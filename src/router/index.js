@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import store from '../store/index.js'
 
 Vue.use(VueRouter)
 
@@ -26,8 +27,13 @@ const router = new VueRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  console.log(to.path, from.path)
+router.beforeEach(async (to, from, next) => {
+  await store.dispatch("getUser")
+  if(to.query.access_code){
+    console.log("route contains access code...")
+    await store.dispatch('exchangeAccessCode', to.query.access_code)
+    next("/")
+  }
   next()
 })
 
