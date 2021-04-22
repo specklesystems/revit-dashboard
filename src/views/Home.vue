@@ -47,7 +47,7 @@
 
 <script>
 const TOKEN = 'SpeckleDemo.AuthToken'
-const SERVER_URL = 'https://latest.speckle.dev'
+const SERVER_URL = process.env.VUE_APP_SERVER_URL
 
 
 export default {
