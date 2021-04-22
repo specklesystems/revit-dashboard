@@ -23,7 +23,7 @@
       <v-spacer></v-spacer>
 
       <div v-if="isAuthenticated">
-        Welcome {{this.$store.state.user.name}}! You are connected to {{this.$store.state.serverInfo.company}}'s {{this.$store.state.serverInfo.name}}
+        Welcome <b>{{this.$store.state.user.name}}</b>! You are connected to <b>{{this.$store.state.serverInfo.company}}'s <em>{{this.$store.state.serverInfo.name}}</em></b>
       </div>
 
       <v-spacer></v-spacer>
@@ -35,7 +35,8 @@
       >
         <span class="mr-2">Login with Speckle</span>
       </v-btn>
-      <v-btn v-else @click="$store.dispatch('logout')">Log out</v-btn>
+      <v-btn v-else @click="$store.dispatch('logout')">
+       Log out</v-btn>
     </v-app-bar>
 
     <v-main>

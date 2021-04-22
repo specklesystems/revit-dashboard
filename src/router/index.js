@@ -10,14 +10,6 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   }
 ]
 
@@ -27,14 +19,17 @@ const router = new VueRouter({
   routes
 })
 
-router.beforeEach(async (to, from, next) => {
-  await store.dispatch("getUser")
-  if(to.query.access_code){
-    console.log("route contains access code...")
-    await store.dispatch('exchangeAccessCode', to.query.access_code)
+router.beforeEach( (to, from, next) => {
+  store.dispatch("getUser").then(() => {
+    if(to.query.access_code){
+      console.log("route contains access code...")
+      return store.dispatch('exchangeAccessCode', to.query.access_code).then(() => "/").catch(err => console.warn("exchange failed", err))
+    }
+  }).then(to => next(to))
+    .catch(err => {
+    console.warn("get user failed",err)
     next("/")
-  }
-  next()
+  })
 })
 
 export default router

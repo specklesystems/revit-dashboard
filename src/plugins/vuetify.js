@@ -15,7 +15,7 @@ export default new Vuetify({
         iconfont: 'mdi'
     },
     theme: {
-        dark: localStorage.getItem('darkModeEnabled') === 'dark',
+        dark: false,
         themes: {
             light: {
                 primary: '#047EFB', //blue
