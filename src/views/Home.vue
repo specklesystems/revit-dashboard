@@ -1,5 +1,5 @@
 <template lang="html">
-  <v-container fluid class="home">
+  <v-container v-if="$store.getters.isAuthenticated" fluid class="home">
     <v-row align="center">
       <v-col
           v-if="streams"
@@ -39,17 +39,15 @@
         ></v-data-table>
       </v-col>
     </v-row>
-    <v-row v-if="lastCommitChildren">
-      <v-col class="d-flex" cols="6" offset="3">
-        <p>{{ JSON.stringify(filteredCommitChildren,null,2) }}</p>
-      </v-col>
-    </v-row>
+  </v-container>
+  <v-container fluid class="home" v-else>
+    <p>Please log in to access you Speckle data.</p>
   </v-container>
 </template>
 
 <script>
 const TOKEN = 'SpeckleDemo.AuthToken'
-const SERVER_URL = 'https://speckle.xyz'
+const SERVER_URL = 'https://latest.speckle.dev'
 
 
 export default {
@@ -59,17 +57,11 @@ export default {
       selectedStreamId: null,
       selectedStream: null,
       lastCommitChildren: null,
-      tableHeaders: [
-        { text: "Name", value: "speckle_type"},
-        { text: "Id", value: "id"},
-        { text: "x", value: "x"},
-        { text: "Children", value: "totalChildrenCount"},
-      ],
-      selectedKeys: []
+      selectedKeys: ["speckle_type", "totalChildrenCount"]
     }
   },
   methods: {
-    async handleStreamSelection(val) {
+    handleStreamSelection(val) {
       console.log("A stream was selected", val)
       this.selectedStream = this.selectedStreamId ? this.streams?.items?.find(s => s.id == this.selectedStreamId) : null;
       if (this.selectedStream) {

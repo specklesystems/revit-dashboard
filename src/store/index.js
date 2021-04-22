@@ -5,7 +5,7 @@ Vue.use(Vuex)
 const TOKEN='SpeckleDemo.AuthToken'
 const REFRESH_TOKEN = 'SpeckleDemo.RefreshToken'
 const CHALLENGE = 'SpeckleDemo.Challenge'
-const SERVER_URL = 'https://speckle.xyz'
+const SERVER_URL = 'https://latest.speckle.dev'
 
 const userInfoQuery = `query {
   user {
