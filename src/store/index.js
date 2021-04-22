@@ -11,21 +11,6 @@ const SERVER_URL = process.env.VUE_APP_SERVER_URL
 const userInfoQuery = `query {
   user {
     name
-    avatar
-    streams(limit: 5) {
-      totalCount
-      items {
-        id
-        name
-        commits(limit: 1) {
-          totalCount
-          items {
-            id
-            referencedObject
-          }
-        }
-      }
-    }
   },
   serverInfo {
     name

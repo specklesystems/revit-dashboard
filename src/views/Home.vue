@@ -2,7 +2,6 @@
   <v-container v-if="$store.getters.isAuthenticated" fluid class="home">
     <v-row align="center">
       <v-col
-          v-if="streams"
           class="d-flex"
           cols="6"
           sm="6"
@@ -54,45 +53,6 @@ export default {
     }
   },
   methods: {
-    handleStreamSelection(val) {
-      console.log("A stream was selected", val)
-      this.selectedStream = this.selectedStreamId ? this.streams?.items?.find(s => s.id == this.selectedStreamId) : null;
-      if (this.selectedStream) {
-
-        var commit = this.selectedStream.commits.items[0]
-        let token = localStorage.getItem(TOKEN)
-
-        if (token)
-          fetch(
-              `${SERVER_URL}/graphql`,
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': 'Bearer ' + token,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  query: `query {
-                    stream(id: "${this.selectedStreamId}"){
-                      object(id: "${commit.referencedObject}"){
-                        children {
-                          objects {
-                            speckleType
-                            data
-                          }
-                        }
-                      }
-                    }
-                  }`
-                })
-              })
-              .then(res => res.json())
-              .then(json => {
-                this.lastCommitChildren = json.data.stream?.object?.children?.objects
-              })
-              .catch(err => console.error(err))
-      }
-    },
     streamSelected(stream){
       console.log("Stream selected", stream)
       let token = localStorage.getItem(TOKEN)
@@ -116,6 +76,9 @@ export default {
                         message
                         branchName
                         sourceApplication
+                        referencedObject
+                        authorName
+                        createdAt
                       }
                     }
                   }
@@ -131,11 +94,7 @@ export default {
 
     }
   },
-
   computed: {
-    streams: function () {
-      return this.$store.state.user?.streams
-    },
     availableKeys: function(){
       var keys = {}
       this.lastCommitChildren?.forEach(obj => {
