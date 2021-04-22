@@ -19,13 +19,19 @@
       </v-col>
     </v-row>
     <v-row v-if="lastCommitChildren">
-      <v-data-table
-          :headers="tableHeaders"
-          :items="filteredCommitChildren"
-          :items-per-page="5"
-          class="elevation-1"
-      ></v-data-table>
-      <p>{{ JSON.stringify(filteredCommitChildren,null,2) }}</p>
+      <v-col class="d-flex" cols="6" offset="3">
+        <v-data-table
+            :headers="tableHeaders"
+            :items="filteredCommitChildren"
+            :items-per-page="5"
+            class="elevation-1"
+        ></v-data-table>
+      </v-col>
+    </v-row>
+    <v-row v-if="lastCommitChildren">
+      <v-col class="d-flex" cols="6" offset="3">
+        <p>{{ JSON.stringify(filteredCommitChildren,null,2) }}</p>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -43,7 +49,7 @@ export default {
       selectedStream: null,
       lastCommitChildren: null,
       tableHeaders: [
-        { text: "Name", value: "name"},
+        { text: "Name", value: "speckle_type"},
         { text: "Id", value: "id"},
         { text: "Children", value: "totalChildrenCount"},
       ],
@@ -100,11 +106,8 @@ export default {
         var copy = Object.assign({},obj.data)
         copy.name = copy.speckle_type
         delete copy.data
-        return {
-          name: copy.speckle_type,
-          id: copy.id,
-          totalChildrenCount: copy.totalChildrenCount
-        }
+        return copy
+
       })
     }
   }
