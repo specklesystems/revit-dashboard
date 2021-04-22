@@ -20,10 +20,21 @@
     </v-row>
     <v-row v-if="lastCommitChildren">
       <v-col class="d-flex" cols="6" offset="3">
+        <v-select
+            v-model="selectedKeys"
+            :items="availableKeys"
+            chips
+            label="Select data to display"
+            multiple
+        ></v-select>
+      </v-col>
+    </v-row>
+    <v-row v-if="lastCommitChildren">
+      <v-col class="d-flex" cols="6" offset="3">
         <v-data-table
-            :headers="tableHeaders"
+            :headers="filteredHeaders"
             :items="filteredCommitChildren"
-            :items-per-page="5"
+            :items-per-page="10"
             class="elevation-1"
         ></v-data-table>
       </v-col>
@@ -51,8 +62,10 @@ export default {
       tableHeaders: [
         { text: "Name", value: "speckle_type"},
         { text: "Id", value: "id"},
+        { text: "x", value: "x"},
         { text: "Children", value: "totalChildrenCount"},
       ],
+      selectedKeys: []
     }
   },
   methods: {
@@ -100,6 +113,20 @@ export default {
   computed: {
     streams: function () {
       return this.$store.state.user?.streams
+    },
+    availableKeys: function(){
+      var keys = {}
+      this.lastCommitChildren.forEach(obj => {
+        Object.keys(obj.data).forEach(key => {
+          if(!keys[key]){
+            keys[key] = true
+          }
+        })
+      })
+      return Object.keys(keys)
+    },
+    filteredHeaders: function() {
+        return this.selectedKeys.map(key => { return { text: key, value: key}})
     },
     filteredCommitChildren: function (){
       return this.lastCommitChildren.map(obj => {
