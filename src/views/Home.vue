@@ -8,14 +8,7 @@
           sm="6"
           offset="3"
       >
-        <v-select
-            v-model="selectedStreamId"
-            :items="streams.items"
-            item-text="name"
-            item-value="id"
-            @change="handleStreamSelection"
-            label="Select a stream"
-        ></v-select>
+        <stream-search @selected="streamSelected"/>
       </v-col>
     </v-row>
     <v-row v-if="lastCommitChildren">
@@ -33,8 +26,7 @@
       <v-col class="d-flex" cols="6" offset="3">
         <v-data-table
             :headers="filteredHeaders"
-            :items="filteredCommitChildren"
-            :items-per-page="10"
+            :items="lastCommitChildren"
             class="elevation-1"
         ></v-data-table>
       </v-col>
@@ -46,18 +38,19 @@
 </template>
 
 <script>
+import StreamSearch from "@/components/StreamSearch";
 const TOKEN = 'SpeckleDemo.AuthToken'
 const SERVER_URL = process.env.VUE_APP_SERVER_URL
 
 
 export default {
   name: 'Home',
+  components: {StreamSearch},
   data: () => {
     return {
-      selectedStreamId: null,
       selectedStream: null,
       lastCommitChildren: null,
-      selectedKeys: ["speckle_type", "totalChildrenCount"]
+      selectedKeys: ["id", "message"]
     }
   },
   methods: {
@@ -99,6 +92,43 @@ export default {
               })
               .catch(err => console.error(err))
       }
+    },
+    streamSelected(stream){
+      console.log("Stream selected", stream)
+      let token = localStorage.getItem(TOKEN)
+      if (token)
+        fetch(
+            `${SERVER_URL}/graphql`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                query: `query {
+                  stream(id: "${stream.id}"){
+                    commits(limit: 10, cursor: null) {
+                      totalCount
+                      cursor
+                      items{
+                        id
+                        message
+                        branchName
+                        sourceApplication
+                      }
+                    }
+                  }
+                }`
+              })
+            })
+            .then(res => res.json())
+            .then(json => json.data.stream.commits)
+            .then(commits => {
+              console.log("commits", commits)
+              this.lastCommitChildren = commits.items
+            })
+
     }
   },
 
@@ -108,8 +138,8 @@ export default {
     },
     availableKeys: function(){
       var keys = {}
-      this.lastCommitChildren.forEach(obj => {
-        Object.keys(obj.data).forEach(key => {
+      this.lastCommitChildren?.forEach(obj => {
+        Object.keys(obj).forEach(key => {
           if(!keys[key]){
             keys[key] = true
           }
@@ -119,15 +149,6 @@ export default {
     },
     filteredHeaders: function() {
         return this.selectedKeys.map(key => { return { text: key, value: key}})
-    },
-    filteredCommitChildren: function (){
-      return this.lastCommitChildren.map(obj => {
-        var copy = Object.assign({},obj.data)
-        copy.name = copy.speckle_type
-        delete copy.data
-        return copy
-
-      })
     }
   }
 }

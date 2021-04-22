@@ -5,6 +5,9 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
 
+import VueTimeago from 'vue-timeago'
+Vue.use(VueTimeago, { locale: 'en' })
+
 Vue.config.productionTip = false
 
 
