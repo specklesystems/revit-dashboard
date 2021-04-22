@@ -6,8 +6,8 @@
           class="d-flex"
           cols="6"
           sm="6"
+          offset="3"
       >
-        <p>{{selectedStream}}</p>
         <v-select
             v-model="selectedStreamId"
             :items="streams.items"
@@ -18,14 +18,20 @@
         ></v-select>
       </v-col>
     </v-row>
-    <v-row>
-      {{lastCommitChildren}}
+    <v-row v-if="lastCommitChildren">
+      <v-data-table
+          :headers="tableHeaders"
+          :items="filteredCommitChildren"
+          :items-per-page="5"
+          class="elevation-1"
+      ></v-data-table>
+      <p>{{ JSON.stringify(filteredCommitChildren,null,2) }}</p>
     </v-row>
   </v-container>
 </template>
 
 <script>
-const TOKEN='SpeckleDemo.AuthToken'
+const TOKEN = 'SpeckleDemo.AuthToken'
 const SERVER_URL = 'https://speckle.xyz'
 
 
@@ -35,50 +41,71 @@ export default {
     return {
       selectedStreamId: null,
       selectedStream: null,
-      lastCommitChildren: null
+      lastCommitChildren: null,
+      tableHeaders: [
+        { text: "Name", value: "name"},
+        { text: "Id", value: "id"},
+        { text: "Children", value: "totalChildrenCount"},
+      ],
     }
   },
   methods: {
-    async handleStreamSelection(val){
+    async handleStreamSelection(val) {
       console.log("A stream was selected", val)
       this.selectedStream = this.selectedStreamId ? this.streams?.items?.find(s => s.id == this.selectedStreamId) : null;
-      if(this.selectedStream){
-        console.log("Loading up objects from latest commit")
+      if (this.selectedStream) {
+
         var commit = this.selectedStream.commits.items[0]
         let token = localStorage.getItem(TOKEN)
-        console.log(commit.referencedObject, token)
-        if (token) {
-          let testResponse = await fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer ' + token,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({query: `query {
-              stream(id: "${this.selectedStreamId}"){
-                object(id: "${commit.referencedObject}"){
-                  children {
-                    objects {
-                      id
-                      speckleType
-                      data
+
+        if (token)
+          fetch(
+              `${SERVER_URL}/graphql`,
+              {
+                method: 'POST',
+                headers: {
+                  'Authorization': 'Bearer ' + token,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  query: `query {
+                    stream(id: "${this.selectedStreamId}"){
+                      object(id: "${commit.referencedObject}"){
+                        children {
+                          objects {
+                            speckleType
+                            data
+                          }
+                        }
+                      }
                     }
-                  }
-                }
-              }
-            }`})
-          })
-          let data = (await testResponse.json()).data
-          console.log("received data", data.stream.object)
-          this.lastCommitChildren = data
+                  }`
+                })
+              })
+              .then(res => res.json())
+              .then(json => {
+                this.lastCommitChildren = json.data.stream?.object?.children?.objects
+              })
+              .catch(err => console.error(err))
       }
     }
-  }
   },
 
   computed: {
     streams: function () {
       return this.$store.state.user?.streams
+    },
+    filteredCommitChildren: function (){
+      return this.lastCommitChildren.map(obj => {
+        var copy = Object.assign({},obj.data)
+        copy.name = copy.speckle_type
+        delete copy.data
+        return {
+          name: copy.speckle_type,
+          id: copy.id,
+          totalChildrenCount: copy.totalChildrenCount
+        }
+      })
     }
   }
 }
