@@ -10,6 +10,19 @@
         <stream-search @selected="$store.dispatch('handleStreamSelection', $event)"/>
       </v-col>
     </v-row>
+
+    <v-row v-if="selectedStream">
+      <v-col class="d-flex" cols="6" offset="3">
+        <h1>{{selectedStream.name}}</h1>
+        <v-btn text small :href="'https://latest.speckle.dev/streams/'+selectedStream.id">View in server</v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <v-col class="d-flex" cols="6" offset="3">
+        <h1>{{selectedStream.name}}</h1>
+        <v-btn text small :href="'https://latest.speckle.dev/streams/'+selectedStream.id">View in server</v-btn>
+      </v-col>
+    </v-row>
     <v-row v-if="commits">
       <v-col class="d-flex" cols="6" offset="3">
         <v-select
@@ -29,6 +42,8 @@
             :items="commits.items"
             :options.sync="options"
             :server-items-length="commits.totalCount"
+            disable-sort
+            disable-filtering
             class="elevation-1"
         ></v-data-table>
       </v-col>
