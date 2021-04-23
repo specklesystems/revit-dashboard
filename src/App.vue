@@ -52,7 +52,7 @@ export default {
     //
   }),
   computed: {
-    isAuthenticated() { return this.$store.state.user != null}
+    isAuthenticated() { return this.$store.getters.isAuthenticated }
   }
 };
 </script>

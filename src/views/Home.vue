@@ -41,7 +41,6 @@
 
 <script>
 import StreamSearch from "@/components/StreamSearch";
-import { getStreamCommits} from "@/speckleUtils";
 
 export default {
   name: 'Home',
@@ -52,30 +51,28 @@ export default {
       options: {
         itemsPerPage: 5
       },
-      selectedStream: null,
-      commits: null,
       selectedKeys: ["id", "message"]
     }
   },
   methods: {
     streamSelected(stream) {
       console.log("Stream selected", stream)
-      this.selectedStream = stream
-      let ipp = this.options.itemsPerPage
-      getStreamCommits(stream.id, 10, null)
-            .then(json => {
-              console.log("got stream commits", json.data.stream.commits)
-              this.commits = json.data.stream.commits
-            })
+      this.$store.dispatch("handleStreamSelection", stream)
     },
-    itemsPerPageUpdated(itemsPerPage){
+    itemsPerPageUpdated(itemsPerPage) {
       console.log("Items per page updated", itemsPerPage)
     },
-    pageUpdated(page){
+    pageUpdated(page) {
       console.log("Page updated", page)
     }
   },
   computed: {
+    selectedStream: function() {
+      return this.$store.state.currentStream
+    },
+    commits: function() {
+      return this.$store.state.latestCommits
+    },
     availableKeys: function () {
       var keys = {}
       this.commits?.items.forEach(obj => {

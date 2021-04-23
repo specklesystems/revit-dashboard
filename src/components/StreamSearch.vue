@@ -39,7 +39,7 @@
 
 <script>
 import {debounce} from "debounce"
-import { searchStreams } from "@/speckleUtils";
+import {searchStreams} from "@/speckleUtils";
 
 export default {
   name: "StreamSearch",
@@ -58,9 +58,11 @@ export default {
   },
   methods: {
     fetchSearchResults(e) {
-      if( !e || e?.length < 3) return
-      searchStreams(e)
-      .then(json => { this.streams = json.data.streams }, this)
+      if (!e || e?.length < 3) return
+      return searchStreams(e)
+          .then(json => {
+            this.streams = json.data.streams
+          })
     },
     debounceInput: debounce(function (e) {
       this.fetchSearchResults(e)

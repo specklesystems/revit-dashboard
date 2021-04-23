@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {exchangeAccessCode, getUserData, goToSpeckleAuthPage, speckleLogOut} from "@/speckleUtils";
+import {exchangeAccessCode, getStreamCommits, getUserData, goToSpeckleAuthPage, speckleLogOut} from "@/speckleUtils";
 
 Vue.use(Vuex)
 
@@ -8,8 +8,8 @@ export default new Vuex.Store({
   state: {
     user: null,
     serverInfo: null,
-    token: null,
-    refreshToken: null
+    currentStream: null,
+    latestCommits: null
   },
   getters: {
     isAuthenticated: (state) => state.user != null
@@ -21,28 +21,25 @@ export default new Vuex.Store({
     setServerInfo(state, info) {
       state.serverInfo = info
     },
-    setToken(state, token) {
-      state.token = token
+    setCurrentStream(state, stream) {
+      state.currentStream = stream
     },
-    setRefreshToken(state, token) {
-      state.refreshToken = token
+    setCommits(state, commits){
+      state.latestCommits = commits
     }
   },
   actions: {
     logout(context) {
+      // Wipe the state
       context.commit("setUser", null)
       context.commit("setServerInfo", null)
-      context.commit("setToken", null)
-      context.commit("setRefreshToken", null)
+      context.commit("setCurrentStream", null)
+      context.commit("setCommits", null)
+      // Wipe the tokens
       speckleLogOut()
     },
     exchangeAccessCode(context, accessCode) {
-      return exchangeAccessCode(accessCode).then(data => {
-        if (data.token) {
-          context.commit("setToken", data.token)
-          context.commit("setRefreshToken", data.refreshToken)
-        }
-      })
+      return exchangeAccessCode(accessCode)
     },
     getUser(context) {
       return getUserData()
@@ -57,6 +54,13 @@ export default new Vuex.Store({
     },
     redirectToAuth() {
       goToSpeckleAuthPage()
+    },
+    handleStreamSelection(context, stream) {
+      context.commit("setCurrentStream", stream)
+      return getStreamCommits(stream.id, 10, null)
+        .then(json => {
+          context.commit("setCommits", json.data.stream.commits)
+        })
     }
   },
   modules: {}
