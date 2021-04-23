@@ -24,7 +24,9 @@ export default new Vuex.Store({
     user: null,
     serverInfo: null,
     currentStream: null,
-    latestCommits: null
+    latestCommits: null,
+    previousCursors: [null],
+    tableOptions: null
   },
   getters: {
     isAuthenticated: (state) => state.user != null
@@ -39,8 +41,17 @@ export default new Vuex.Store({
     setCurrentStream(state, stream) {
       state.currentStream = stream
     },
-    setCommits(state, commits){
+    setCommits(state, commits) {
       state.latestCommits = commits
+    },
+    setTableOptions(state, options) {
+      state.tableOptions = options
+    },
+    resetPrevCursors(state) {
+      state.previousCursors = [ null ]
+    },
+    addCursorToPreviousList(state, cursor){
+      state.previousCursors.push(cursor)
     }
   },
   actions: {
@@ -50,6 +61,8 @@ export default new Vuex.Store({
       context.commit("setServerInfo", null)
       context.commit("setCurrentStream", null)
       context.commit("setCommits", null)
+      context.commit("setTableOptions", null)
+      context.commit("resetPrevCursors")
       // Wipe the tokens
       speckleLogOut()
     },
@@ -73,6 +86,8 @@ export default new Vuex.Store({
     },
     handleStreamSelection(context, stream) {
       context.commit("setCurrentStream", stream)
+      context.commit("setTableOptions", { itemsPerPage: 5 })
+      context.commit("resetPrevCursors")
       return getStreamCommits(stream.id, 5, null)
         .then(json => {
           context.commit("setCommits", json.data.stream.commits)

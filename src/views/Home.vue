@@ -17,12 +17,6 @@
         <v-btn text small :href="'https://latest.speckle.dev/streams/'+selectedStream.id">View in server</v-btn>
       </v-col>
     </v-row>
-    <v-row v-else>
-      <v-col class="d-flex" cols="6" offset="3">
-        <h1>{{selectedStream.name}}</h1>
-        <v-btn text small :href="'https://latest.speckle.dev/streams/'+selectedStream.id">View in server</v-btn>
-      </v-col>
-    </v-row>
     <v-row v-if="commits">
       <v-col class="d-flex" cols="6" offset="3">
         <v-select
@@ -44,6 +38,7 @@
             :server-items-length="commits.totalCount"
             disable-sort
             disable-filtering
+            :disable-pagination="loading"
             class="elevation-1"
         ></v-data-table>
       </v-col>
@@ -67,14 +62,20 @@ export default {
         itemsPerPage: 5
       },
       selectedKeys: ["id", "message", "branchName", "authorName"],
-      prevCursors: [null]
     }
+  },
+  mounted() {
+    var storedOpts = this.$store.state.tableOptions
+    if(storedOpts) this.options = storedOpts
   },
   methods: {
   },
   computed: {
     selectedStream: function() {
       return this.$store.state.currentStream
+    },
+    previousCursors: function (){
+      return this.$store.state.previousCursors || [ null ]
     },
     commits: function() {
       return this.$store.state.latestCommits
@@ -99,18 +100,20 @@ export default {
   watch: {
     options: {
       handler(val, oldval) {
+        this.$store.commit("setTableOptions", val)
         if(oldval.page && val.page != oldval.page){
           if(val.page > oldval.page) {
             this.loading = true
-            this.prevCursors.push(this.$store.state.latestCommits.cursor)
-            this.$store.dispatch("getCommits", this.$store.state.latestCommits.cursor).then(() => {
+            var cursor = this.$store.state.latestCommits.cursor
+            this.$store.dispatch("getCommits", cursor).then(() => {
+              this.$store.commit("addCursorToPreviousList", cursor)
               this.loading = false
             })
           }
           else {
             console.log("page down")
             this.loading = true
-            this.$store.dispatch("getCommits", this.prevCursors[val.page - 1]).then(() => {
+            this.$store.dispatch("getCommits", this.previousCursors[val.page - 1]).then(() => {
               this.loading = false
             })
           }
