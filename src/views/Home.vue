@@ -51,7 +51,8 @@ export default {
       options: {
         itemsPerPage: 5
       },
-      selectedKeys: ["id", "message"]
+      selectedKeys: ["id", "message", "branchName", "authorName"],
+      prevCursors: [null]
     }
   },
   methods: {
@@ -82,8 +83,23 @@ export default {
   },
   watch: {
     options: {
-      handler() {
-        console.log('options have changed', this.options)
+      handler(val, oldval) {
+        if(oldval.page && val.page != oldval.page){
+          if(val.page > oldval.page) {
+            this.loading = true
+            this.prevCursors.push(this.$store.state.latestCommits.cursor)
+            this.$store.dispatch("getCommits", this.$store.state.latestCommits.cursor).then(() => {
+              this.loading = false
+            })
+          }
+          else {
+            console.log("page down")
+            this.loading = true
+            this.$store.dispatch("getCommits", this.prevCursors[val.page - 1]).then(() => {
+              this.loading = false
+            })
+          }
+        }
       },
       deep: true
     }
@@ -94,5 +110,8 @@ export default {
 <style lang="scss">
 #viewer {
   min-height: 500px;
+}
+.v-data-footer__select {
+  display: none !important;
 }
 </style>

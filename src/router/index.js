@@ -21,15 +21,19 @@ const router = new VueRouter({
 
 router.beforeEach( async (to, from, next) => {
   if(to.query.access_code){
-    console.log("route contains access code...")
-    store.dispatch('exchangeAccessCode', to.query.access_code).then(() => next("/")).catch(err => console.warn("exchange failed", err))
-  }
-  else {
-    store.dispatch("getUser").then(to => next(to))
+    // If the route contains an access code, exchange it and go home.
+    store.dispatch('exchangeAccessCode', to.query.access_code)
+      .then(() => next("/"))
       .catch(err => {
-        console.warn("get user failed",err)
+        console.warn("exchange failed", err);
         next("/")
       })
+  }
+  else {
+    // Check on every route change if you still have access.
+    store.dispatch("getUser")
+      .then(to => next(to))
+      .catch(err => next("/"))
   }
 })
 

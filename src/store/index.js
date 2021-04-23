@@ -73,7 +73,13 @@ export default new Vuex.Store({
     },
     handleStreamSelection(context, stream) {
       context.commit("setCurrentStream", stream)
-      return getStreamCommits(stream.id, 10, null)
+      return getStreamCommits(stream.id, 5, null)
+        .then(json => {
+          context.commit("setCommits", json.data.stream.commits)
+        })
+    },
+    getCommits(context, cursor) {
+      return getStreamCommits(context.state.currentStream.id, 5, cursor)
         .then(json => {
           context.commit("setCommits", json.data.stream.commits)
         })
