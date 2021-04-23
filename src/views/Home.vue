@@ -14,7 +14,7 @@
     <v-row v-if="selectedStream">
       <v-col class="d-flex" cols="6" offset="3">
         <h1>{{selectedStream.name}}</h1>
-        <v-btn text small :href="serverUrl+'/'+selectedStream.id">View in server</v-btn>
+        <v-btn text small :href="serverUrl+'/streams/'+selectedStream.id">View in server</v-btn>
       </v-col>
     </v-row>
     <v-row v-if="commits">
