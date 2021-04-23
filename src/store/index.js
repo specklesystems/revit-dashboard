@@ -1,10 +1,25 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {exchangeAccessCode, getStreamCommits, getUserData, goToSpeckleAuthPage, speckleLogOut} from "@/speckleUtils";
+import VuexPersistence from 'vuex-persist'
+
+import {
+  APP_NAME,
+  exchangeAccessCode,
+  getStreamCommits,
+  getUserData,
+  goToSpeckleAuthPage,
+  speckleLogOut
+} from "@/speckleUtils";
 
 Vue.use(Vuex)
 
+const vuexLocal = new VuexPersistence({
+  storage: window.localStorage,
+  key: `${APP_NAME}.vuex`
+})
+
 export default new Vuex.Store({
+  plugins: [vuexLocal.plugin],
   state: {
     user: null,
     serverInfo: null,
@@ -39,6 +54,7 @@ export default new Vuex.Store({
       speckleLogOut()
     },
     exchangeAccessCode(context, accessCode) {
+      // Here, we could save the tokens to the store if necessary.
       return exchangeAccessCode(accessCode)
     },
     getUser(context) {

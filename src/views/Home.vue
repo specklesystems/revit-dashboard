@@ -7,7 +7,7 @@
           sm="6"
           offset="3"
       >
-        <stream-search @selected="streamSelected"/>
+        <stream-search @selected="$store.dispatch('handleStreamSelection', $event)"/>
       </v-col>
     </v-row>
     <v-row v-if="commits">
@@ -55,16 +55,6 @@ export default {
     }
   },
   methods: {
-    streamSelected(stream) {
-      console.log("Stream selected", stream)
-      this.$store.dispatch("handleStreamSelection", stream)
-    },
-    itemsPerPageUpdated(itemsPerPage) {
-      console.log("Items per page updated", itemsPerPage)
-    },
-    pageUpdated(page) {
-      console.log("Page updated", page)
-    }
   },
   computed: {
     selectedStream: function() {

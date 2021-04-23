@@ -48,9 +48,6 @@
 <script>
 export default {
   name: 'App',
-  data: () => ({
-    //
-  }),
   computed: {
     isAuthenticated() { return this.$store.getters.isAuthenticated }
   }
