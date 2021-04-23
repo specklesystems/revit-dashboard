@@ -39,9 +39,7 @@
 
 <script>
 import {debounce} from "debounce"
-
-const TOKEN = 'SpeckleDemo.AuthToken'
-const SERVER_URL = process.env.VUE_APP_SERVER_URL
+import { searchStreams } from "@/speckleUtils";
 
 export default {
   name: "StreamSearch",
@@ -60,35 +58,9 @@ export default {
   },
   methods: {
     fetchSearchResults(e) {
-      if( !e || e?.length < 3) return;
-      console.log("execute search", e)
-      let token = localStorage.getItem(TOKEN)
-      if (token) {
-        fetch(`${SERVER_URL}/graphql`, {
-              method: 'POST',
-              headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                query: `
-                query {
-                  streams(query: "${e}") {
-                    totalCount
-                    cursor
-                    items {
-                      id
-                      name
-                      updatedAt
-                    }
-                  }
-                }
-              `,
-              })
-            }
-        )
-            .then(res => res.json()).then(json => { console.warn(json.data.streams); this.streams = json.data.streams }, this)
-      }
+      if( !e || e?.length < 3) return
+      searchStreams(e)
+      .then(json => { this.streams = json.data.streams }, this)
     },
     debounceInput: debounce(function (e) {
       this.fetchSearchResults(e)

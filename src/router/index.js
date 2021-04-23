@@ -19,17 +19,18 @@ const router = new VueRouter({
   routes
 })
 
-router.beforeEach( (to, from, next) => {
-  store.dispatch("getUser").then(() => {
-    if(to.query.access_code){
-      console.log("route contains access code...")
-      return store.dispatch('exchangeAccessCode', to.query.access_code).then(() => "/").catch(err => console.warn("exchange failed", err))
-    }
-  }).then(to => next(to))
-    .catch(err => {
-    console.warn("get user failed",err)
-    next("/")
-  })
+router.beforeEach( async (to, from, next) => {
+  if(to.query.access_code){
+    console.log("route contains access code...")
+    store.dispatch('exchangeAccessCode', to.query.access_code).then(() => next("/")).catch(err => console.warn("exchange failed", err))
+  }
+  else {
+    store.dispatch("getUser").then(to => next(to))
+      .catch(err => {
+        console.warn("get user failed",err)
+        next("/")
+      })
+  }
 })
 
 export default router

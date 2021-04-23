@@ -1,22 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import {exchangeAccessCode, getUserData, goToSpeckleAuthPage, speckleLogOut} from "@/speckleUtils";
 
 Vue.use(Vuex)
-
-const TOKEN = 'SpeckleDemo.AuthToken'
-const REFRESH_TOKEN = 'SpeckleDemo.RefreshToken'
-const CHALLENGE = 'SpeckleDemo.Challenge'
-const SERVER_URL = process.env.VUE_APP_SERVER_URL
-
-const userInfoQuery = `query {
-  user {
-    name
-  },
-  serverInfo {
-    name
-    company
-  }
-}`
 
 export default new Vuex.Store({
   state: {
@@ -48,69 +34,29 @@ export default new Vuex.Store({
       context.commit("setServerInfo", null)
       context.commit("setToken", null)
       context.commit("setRefreshToken", null)
-      localStorage.removeItem(TOKEN)
-      localStorage.removeItem(REFRESH_TOKEN)
+      speckleLogOut()
     },
-    async exchangeAccessCode(context, accessCode) {
-      let response = await fetch(`${SERVER_URL}/auth/token/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          accessCode: accessCode,
-          appId: 'explorer',
-          appSecret: 'explorer',
-          challenge: localStorage.getItem(CHALLENGE)
-        })
+    exchangeAccessCode(context, accessCode) {
+      return exchangeAccessCode(accessCode).then(data => {
+        if (data.token) {
+          context.commit("setToken", data.token)
+          context.commit("setRefreshToken", data.refreshToken)
+        }
       })
-
-      let data = await response.json()
-      console.log("data", data.token)
-      if (data.token) {
-        localStorage.removeItem(CHALLENGE)
-        context.commit("setToken", data.token)
-        context.commit("setRefreshToken", data.refreshToken)
-        localStorage.setItem(TOKEN, data.token)
-        localStorage.setItem(REFRESH_TOKEN, data.refreshToken)
-      }
-
     },
     getUser(context) {
-      let token = localStorage.getItem(TOKEN)
-      if (token) {
-        fetch(`${SERVER_URL}/graphql`, {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer ' + token,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({query: userInfoQuery})
-          }
-        )
-          .then(res => res.json())
-          .then(json => {
-            var data = json.data
-            if (data.user) {
-              console.log("Got user!", data.user)
-              context.commit("setUser", data.user)
-              console.log("User logged in as " + data.user.name)
-            }
-            if (data.serverInfo) {
-              context.commit("setServerInfo", data.serverInfo)
-            }
-          })
-      } else {
-        console.log("User is not logged in")
-      }
+      return getUserData()
+        .then(json => {
+          var data = json.data
+          context.commit("setUser", data.user)
+          context.commit("setServerInfo", data.serverInfo)
+        })
+        .catch(err => {
+          console.error(err)
+        })
     },
     redirectToAuth() {
-      // Generate random challenge
-      var challenge = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-      // Save challenge in localStorage
-      localStorage.setItem(CHALLENGE, challenge)
-      // Send user to auth page
-      window.location = `${SERVER_URL}/authn/verify/${process.env.VUE_APP_SPECKLE_ID}/${challenge}`
+      goToSpeckleAuthPage()
     }
   },
   modules: {}

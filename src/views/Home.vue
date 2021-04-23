@@ -10,7 +10,7 @@
         <stream-search @selected="streamSelected"/>
       </v-col>
     </v-row>
-    <v-row v-if="lastCommitChildren">
+    <v-row v-if="commits">
       <v-col class="d-flex" cols="6" offset="3">
         <v-select
             v-model="selectedKeys"
@@ -21,11 +21,14 @@
         ></v-select>
       </v-col>
     </v-row>
-    <v-row v-if="lastCommitChildren">
+    <v-row v-if="commits">
       <v-col class="d-flex" cols="6" offset="3">
         <v-data-table
+            :loading="loading"
             :headers="filteredHeaders"
-            :items="lastCommitChildren"
+            :items="commits.items"
+            :options.sync="options"
+            :server-items-length="commits.totalCount"
             class="elevation-1"
         ></v-data-table>
       </v-col>
@@ -38,76 +41,64 @@
 
 <script>
 import StreamSearch from "@/components/StreamSearch";
-const TOKEN = 'SpeckleDemo.AuthToken'
-const SERVER_URL = process.env.VUE_APP_SERVER_URL
-
+import { getStreamCommits} from "@/speckleUtils";
 
 export default {
   name: 'Home',
   components: {StreamSearch},
   data: () => {
     return {
+      loading: false,
+      options: {
+        itemsPerPage: 5
+      },
       selectedStream: null,
-      lastCommitChildren: null,
+      commits: null,
       selectedKeys: ["id", "message"]
     }
   },
   methods: {
-    streamSelected(stream){
+    streamSelected(stream) {
       console.log("Stream selected", stream)
-      let token = localStorage.getItem(TOKEN)
-      if (token)
-        fetch(
-            `${SERVER_URL}/graphql`,
-            {
-              method: 'POST',
-              headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                query: `query {
-                  stream(id: "${stream.id}"){
-                    commits(limit: 10, cursor: null) {
-                      totalCount
-                      cursor
-                      items{
-                        id
-                        message
-                        branchName
-                        sourceApplication
-                        referencedObject
-                        authorName
-                        createdAt
-                      }
-                    }
-                  }
-                }`
-              })
+      this.selectedStream = stream
+      let ipp = this.options.itemsPerPage
+      getStreamCommits(stream.id, 10, null)
+            .then(json => {
+              console.log("got stream commits", json.data.stream.commits)
+              this.commits = json.data.stream.commits
             })
-            .then(res => res.json())
-            .then(json => json.data.stream.commits)
-            .then(commits => {
-              console.log("commits", commits)
-              this.lastCommitChildren = commits.items
-            })
-
+    },
+    itemsPerPageUpdated(itemsPerPage){
+      console.log("Items per page updated", itemsPerPage)
+    },
+    pageUpdated(page){
+      console.log("Page updated", page)
     }
   },
   computed: {
-    availableKeys: function(){
+    availableKeys: function () {
       var keys = {}
-      this.lastCommitChildren?.forEach(obj => {
+      this.commits?.items.forEach(obj => {
         Object.keys(obj).forEach(key => {
-          if(!keys[key]){
+          if (!keys[key]) {
             keys[key] = true
           }
         })
       })
       return Object.keys(keys)
     },
-    filteredHeaders: function() {
-        return this.selectedKeys.map(key => { return { text: key, value: key}})
+    filteredHeaders: function () {
+      return this.selectedKeys.map(key => {
+        return {text: key, value: key}
+      })
+    }
+  },
+  watch: {
+    options: {
+      handler() {
+        console.log('options have changed', this.options)
+      },
+      deep: true
     }
   }
 }
