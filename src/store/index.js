@@ -98,6 +98,12 @@ export default new Vuex.Store({
         .then(json => {
           context.commit("setCommits", json.data.stream.commits)
         })
+    },
+    clearStreamSelection(context){
+      context.commit("setCurrentStream", null)
+      context.commit("setCommits", null)
+      context.commit("setTableOptions", null)
+      context.commit("resetPrevCursors", [ null ])
     }
   },
   modules: {}

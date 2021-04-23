@@ -1,26 +1,33 @@
 <template lang="html">
-  <v-container v-if="$store.getters.isAuthenticated" class="home pa-6">
+  <WelcomeView v-if="!$store.getters.isAuthenticated"/>
+  <v-container v-else class="home pa-6">
     <stream-search @selected="$store.dispatch('handleStreamSelection', $event)"/>
-    <h1 v-if="selectedStream" class="pt-6">
-      {{ selectedStream.name }}
-      <v-btn outlined text small :href="serverUrl+'/streams/'+selectedStream.id">View in server</v-btn>
-    </h1>
-    <div v-if="commits" class="pt-6">
+    <h2 class="pt-6 primary--text">
+      <span v-if="selectedStream">
+        {{ selectedStream.name }} — {{ selectedStream.id }}
+        <v-btn outlined text small class="ml-3" :href="serverUrl+'/streams/'+selectedStream.id">View in server</v-btn>
+        <v-btn outlined text small class="ml-3" color="error" @click="$store.dispatch('clearStreamSelection')">Clear selection</v-btn>
+      </span>
+      <span v-else>
+        <em>No stream selected. Find one using the search bar 👆🏼</em>
+      </span>
+    </h2>
+
+    <div class="pt-6">
       <v-select
-          v-if="commits"
           v-model="selectedKeys"
           :items="availableKeys"
           chips
           label="Select data to display"
           multiple
       ></v-select>
-      <h3>Stream commits:</h3>
+      <h3 class="pa-2 primary--text">Stream commits:</h3>
       <v-data-table
           :loading="loading"
           :headers="filteredHeaders"
-          :items="commits.items"
+          :items="commits ? commits.items : []"
           :options.sync="options"
-          :server-items-length="commits.totalCount"
+          :server-items-length="commits ? commits.totalCount : null"
           disable-sort
           disable-filtering
           :disable-pagination="loading"
@@ -28,17 +35,15 @@
       ></v-data-table>
     </div>
   </v-container>
-  <v-container fluid class="home" v-else>
-    <p>Please log in to access you Speckle data.</p>
-  </v-container>
 </template>
 
 <script>
 import StreamSearch from "@/components/StreamSearch";
+import WelcomeView from "@/components/WelcomeView";
 
 export default {
   name: 'Home',
-  components: {StreamSearch},
+  components: {WelcomeView, StreamSearch},
   data: () => {
     return {
       loading: false,
