@@ -15,7 +15,7 @@
             width="40"
             height="24"
         />
-        <h3>SPECKLE DEMO APP</h3>
+        <h3>Speckle Demo App</h3>
       </div>
 
       <v-spacer></v-spacer>
