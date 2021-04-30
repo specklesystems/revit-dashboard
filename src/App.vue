@@ -15,17 +15,14 @@
             width="40"
             height="24"
         />
-        <h3>SPECKLE DEMO APP</h3>
+        <h3>Speckle Demo App</h3>
       </div>
 
       <v-spacer></v-spacer>
 
-      <div v-if="isAuthenticated">
-        Welcome <b>{{ this.$store.state.user.name }}</b>! You are connected to
-        <b>{{ this.$store.state.serverInfo.company }}'s <em>{{ this.$store.state.serverInfo.name }}</em></b>
+      <div v-if="isAuthenticated" class="mr-1">
+        Welcome <b>{{ this.$store.state.user.name }}</b>!
       </div>
-
-      <v-spacer></v-spacer>
 
       <v-btn
           outlined

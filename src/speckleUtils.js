@@ -28,8 +28,8 @@ export function exchangeAccessCode(accessCode){
     },
     body: JSON.stringify({
       accessCode: accessCode,
-      appId: 'explorer',
-      appSecret: 'explorer',
+      appId: process.env.VUE_APP_SPECKLE_ID,
+      appSecret: process.env.VUE_APP_SPECKLE_SECRET,
       challenge: localStorage.getItem(CHALLENGE)
     })
   }).then(res => res.json()).then(data => {
