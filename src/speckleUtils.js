@@ -1,6 +1,6 @@
 import {streamCommitsQuery, streamSearchQuery, userInfoQuery} from "@/speckleQueries";
 
-export const APP_NAME = process.env.VUE_APP_SPECKLE_NAME
+export const APP_NAME = process.env.VUE_APP_SPECKLE_NAME //VUE_APP_SPECKLE_ID
 export const SERVER_URL = process.env.VUE_APP_SERVER_URL
 export const TOKEN = `${APP_NAME}.AuthToken`
 export const REFRESH_TOKEN = `${APP_NAME}.RefreshToken`
@@ -28,8 +28,8 @@ export function exchangeAccessCode(accessCode){
     },
     body: JSON.stringify({
       accessCode: accessCode,
-      appId: 'explorer',
-      appSecret: 'explorer',
+      appId: process.env.VUE_APP_SPECKLE_ID,
+      appSecret: process.env.VUE_APP_SPECKLE_SECRET,
       challenge: localStorage.getItem(CHALLENGE)
     })
   }).then(res => res.json()).then(data => {
