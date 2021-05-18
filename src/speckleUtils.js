@@ -6,6 +6,7 @@ export const TOKEN = `${APP_NAME}.AuthToken`
 export const REFRESH_TOKEN = `${APP_NAME}.RefreshToken`
 export const CHALLENGE = `${APP_NAME}.Challenge`
 
+// Redirects to the Speckle server authentication page, using a randomly generated challenge. Challenge will be stored to compare with when exchanging the access code.
 export function goToSpeckleAuthPage() {
   // Generate random challenge
   var challenge = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
@@ -15,13 +16,16 @@ export function goToSpeckleAuthPage() {
   window.location = `${SERVER_URL}/authn/verify/${process.env.VUE_APP_SPECKLE_ID}/${challenge}`
 }
 
-export function speckleLogOut(){
+// Log out the current user. This removes the token/refreshToken pair.
+export function speckleLogOut() {
+  // Remove both token and refreshToken from localStorage
   localStorage.removeItem(TOKEN)
   localStorage.removeItem(REFRESH_TOKEN)
 }
 
-export function exchangeAccessCode(accessCode){
-  return fetch(`${SERVER_URL}/auth/token/`, {
+// Exchanges the provided access code with a token/refreshToken pair, and saves them to local storage.
+export async function exchangeAccessCode(accessCode) {
+  var res = await fetch(`${SERVER_URL}/auth/token/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -32,38 +36,47 @@ export function exchangeAccessCode(accessCode){
       appSecret: process.env.VUE_APP_SPECKLE_SECRET,
       challenge: localStorage.getItem(CHALLENGE)
     })
-  }).then(res => res.json()).then(data => {
-    if (data.token) {
-      localStorage.removeItem(CHALLENGE)
-      localStorage.setItem(TOKEN, data.token)
-      localStorage.setItem(REFRESH_TOKEN, data.refreshToken)
-    }
-    return data
   })
+  var data = await res.json()
+  if (data.token) {
+    // If retrieving the token was successful, remove challenge and set the new token and refresh token
+    localStorage.removeItem(CHALLENGE)
+    localStorage.setItem(TOKEN, data.token)
+    localStorage.setItem(REFRESH_TOKEN, data.refreshToken)
+  }
+  return data
 }
 
-export function speckleFetch(query){
+// Calls the GraphQL endpoint of the Speckle server with a specific query.
+export async function speckleFetch(query) {
   let token = localStorage.getItem(TOKEN)
   if (token)
-    return fetch(
-      `${SERVER_URL}/graphql`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: query
+    try {
+      var res = await fetch(
+        `${SERVER_URL}/graphql`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: query
+          })
         })
-      })
-      .then(res => res.json())
+      return await res.json()
+    } catch (err) {
+      console.error("API call failed", err)
+    }
   else
     return Promise.reject("You are not logged in (token does not exist)")
 }
 
+// Fetch the current user data using the userInfoQuery
 export const getUserData = () => speckleFetch(userInfoQuery())
 
+// Fetch for streams matching the specified text using the streamSearchQuery
 export const searchStreams = (e) => speckleFetch(streamSearchQuery(e))
 
+// Get commits related to a specific stream, allows for pagination by passing a cursor
 export const getStreamCommits = (streamId, itemsPerPage, cursor) => speckleFetch(streamCommitsQuery(streamId, itemsPerPage, cursor))

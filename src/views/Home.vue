@@ -88,22 +88,21 @@ export default {
   },
   watch: {
     options: {
-      handler(val, oldval) {
+      async handler(val, oldval) {
         this.$store.commit("setTableOptions", val)
         if (oldval.page && val.page != oldval.page) {
           if (val.page > oldval.page) {
             this.loading = true
             var cursor = this.$store.state.latestCommits.cursor
-            this.$store.dispatch("getCommits", cursor).then(() => {
-              this.$store.commit("addCursorToPreviousList", cursor)
-              this.loading = false
-            })
+            await this.$store.dispatch("getCommits", cursor)
+            this.$store.commit("addCursorToPreviousList", cursor)
+            this.loading = false
+
           } else {
             console.log("page down")
             this.loading = true
-            this.$store.dispatch("getCommits", this.previousCursors[val.page - 1]).then(() => {
-              this.loading = false
-            })
+            await this.$store.dispatch("getCommits", this.previousCursors[val.page - 1])
+            this.loading = false
           }
         }
       },

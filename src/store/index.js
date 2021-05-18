@@ -70,34 +70,29 @@ export default new Vuex.Store({
       // Here, we could save the tokens to the store if necessary.
       return exchangeAccessCode(accessCode)
     },
-    getUser(context) {
-      return getUserData()
-        .then(json => {
-          var data = json.data
-          context.commit("setUser", data.user)
-          context.commit("setServerInfo", data.serverInfo)
-        })
-        .catch(err => {
-          console.error(err)
-        })
+    async getUser(context) {
+      try {
+        var json = await getUserData()
+        var data = json.data
+        context.commit("setUser", data.user)
+        context.commit("setServerInfo", data.serverInfo)
+      } catch (err) {
+        console.error(err)
+      }
     },
     redirectToAuth() {
       goToSpeckleAuthPage()
     },
-    handleStreamSelection(context, stream) {
+    async handleStreamSelection(context, stream) {
       context.commit("setCurrentStream", stream)
       context.commit("setTableOptions", { itemsPerPage: 5 })
       context.commit("resetPrevCursors")
-      return getStreamCommits(stream.id, 5, null)
-        .then(json => {
-          context.commit("setCommits", json.data.stream.commits)
-        })
+      var json = await getStreamCommits(stream.id, 5, null)
+      context.commit("setCommits", json.data.stream.commits)
     },
-    getCommits(context, cursor) {
-      return getStreamCommits(context.state.currentStream.id, 5, cursor)
-        .then(json => {
-          context.commit("setCommits", json.data.stream.commits)
-        })
+    async getCommits(context, cursor) {
+      var json = await getStreamCommits(context.state.currentStream.id, 5, cursor)
+      context.commit("setCommits", json.data.stream.commits)
     },
     clearStreamSelection(context){
       context.commit("setCurrentStream", null)
