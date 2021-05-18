@@ -6,6 +6,7 @@ export const TOKEN = `${APP_NAME}.AuthToken`
 export const REFRESH_TOKEN = `${APP_NAME}.RefreshToken`
 export const CHALLENGE = `${APP_NAME}.Challenge`
 
+// Redirects to the Speckle server authentication page, using a randomly generated challenge. Challenge will be stored to compare with when exchanging the access code.
 export function goToSpeckleAuthPage() {
   // Generate random challenge
   var challenge = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
@@ -15,11 +16,14 @@ export function goToSpeckleAuthPage() {
   window.location = `${SERVER_URL}/authn/verify/${process.env.VUE_APP_SPECKLE_ID}/${challenge}`
 }
 
+// Log out the current user. This removes the token/refreshToken pair.
 export function speckleLogOut() {
+  // Remove both token and refreshToken from localStorage
   localStorage.removeItem(TOKEN)
   localStorage.removeItem(REFRESH_TOKEN)
 }
 
+// Exchanges the provided access code with a token/refreshToken pair, and saves them to local storage.
 export async function exchangeAccessCode(accessCode) {
   var res = await fetch(`${SERVER_URL}/auth/token/`, {
     method: 'POST',
@@ -35,6 +39,7 @@ export async function exchangeAccessCode(accessCode) {
   })
   var data = await res.json()
   if (data.token) {
+    // If retrieving the token was successful, remove challenge and set the new token and refresh token
     localStorage.removeItem(CHALLENGE)
     localStorage.setItem(TOKEN, data.token)
     localStorage.setItem(REFRESH_TOKEN, data.refreshToken)
@@ -42,6 +47,7 @@ export async function exchangeAccessCode(accessCode) {
   return data
 }
 
+// Calls the GraphQL endpoint of the Speckle server with a specific query.
 export async function speckleFetch(query) {
   let token = localStorage.getItem(TOKEN)
   if (token)
@@ -66,8 +72,11 @@ export async function speckleFetch(query) {
     return Promise.reject("You are not logged in (token does not exist)")
 }
 
+// Fetch the current user data using the userInfoQuery
 export const getUserData = () => speckleFetch(userInfoQuery())
 
+// Fetch for streams matching the specified text using the streamSearchQuery
 export const searchStreams = (e) => speckleFetch(streamSearchQuery(e))
 
+// Get commits related to a specific stream, allows for pagination by passing a cursor
 export const getStreamCommits = (streamId, itemsPerPage, cursor) => speckleFetch(streamCommitsQuery(streamId, itemsPerPage, cursor))
