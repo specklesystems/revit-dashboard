@@ -57,12 +57,10 @@ export default {
     }
   },
   methods: {
-    fetchSearchResults(e) {
+    async fetchSearchResults(e) {
       if (!e || e?.length < 3) return
-      return searchStreams(e)
-          .then(json => {
-            this.streams = json.data.streams
-          })
+      var json = await searchStreams(e)
+      this.streams = json.data.streams
     },
     debounceInput: debounce(function (e) {
       this.fetchSearchResults(e)
