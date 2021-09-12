@@ -15,8 +15,12 @@
             width="40"
             height="24"
         />
-        <h3>Speckle Demo App</h3>
+        <h3>Speckle</h3>
       </div>
+
+      <v-spacer></v-spacer>
+
+      <stream-search @selected="$store.dispatch('handleStreamSelection', $event)"/>
 
       <v-spacer></v-spacer>
 
@@ -43,8 +47,11 @@
 </template>
 
 <script>
+import StreamSearch from "@/components/StreamSearch";
+
 export default {
   name: 'App',
+  components: {StreamSearch},
   computed: {
     isAuthenticated() {
       return this.$store.getters.isAuthenticated

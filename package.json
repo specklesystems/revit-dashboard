@@ -1,5 +1,5 @@
 {
-  "name": "speckle-demo-app",
+  "name": "speckle-revit-dashboard-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@speckle/objectloader": "^2.0.0",
-    "@speckle/viewer": "^2.0.1",
+    "@speckle/viewer": "^2.1.0",
     "core-js": "^3.6.5",
     "debounce": "^1.2.1",
     "register-service-worker": "^1.7.1",

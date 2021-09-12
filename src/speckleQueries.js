@@ -26,6 +26,7 @@ export const streamCommitsQuery = (streamId, itemsPerPage, cursor) => `query {
                 }
               }`
 
+
 export const streamSearchQuery = (search) => `query {
       streams(query: "${search}") {
         totalCount
