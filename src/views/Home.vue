@@ -1,6 +1,6 @@
 <template lang="html">
   <v-container class="home pa-6">
-    <revit-stream :stream-id="selectedStream.id"/>
+    <revit-stream :stream-id="selectedStream ? selectedStream.id : null"/>
   </v-container>
 </template>
 

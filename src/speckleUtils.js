@@ -1,4 +1,4 @@
-import {streamCommitsQuery, streamSearchQuery, userInfoQuery} from "@/speckleQueries";
+import {streamCommitsQuery, streamObjectQuery, streamSearchQuery, userInfoQuery} from "@/speckleQueries";
 
 export const APP_NAME = process.env.VUE_APP_SPECKLE_NAME
 export const SERVER_URL = process.env.VUE_APP_SERVER_URL
@@ -48,7 +48,7 @@ export async function exchangeAccessCode(accessCode) {
 }
 
 // Calls the GraphQL endpoint of the Speckle server with a specific query.
-export async function speckleFetch(query) {
+export async function speckleFetch(query, vars) {
   let token = localStorage.getItem(TOKEN)
   if (token)
     try {
@@ -61,7 +61,8 @@ export async function speckleFetch(query) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            query: query
+            query: query,
+            variables: vars || null
           })
         })
       return await res.json()
@@ -73,10 +74,14 @@ export async function speckleFetch(query) {
 }
 
 // Fetch the current user data using the userInfoQuery
-export const getUserData = () => speckleFetch(userInfoQuery())
+export const getUserData = () => speckleFetch(userInfoQuery)
 
 // Fetch for streams matching the specified text using the streamSearchQuery
-export const searchStreams = (e) => speckleFetch(streamSearchQuery(e))
+export const searchStreams = (e) => speckleFetch(streamSearchQuery, {searchText: e})
 
 // Get commits related to a specific stream, allows for pagination by passing a cursor
-export const getStreamCommits = (streamId, itemsPerPage, cursor) => speckleFetch(streamCommitsQuery(streamId, itemsPerPage, cursor))
+export const getStreamCommits = (streamId, itemsPerPage, cursor) => speckleFetch(streamCommitsQuery, {id: streamId, cursor, limit: itemsPerPage})
+
+export const getStreamObject = (streamId, objectId) => speckleFetch(streamObjectQuery, {streamId, objectId}).then(res => res.data?.stream?.object?.data)
+
+

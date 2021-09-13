@@ -1,0 +1,7 @@
+query($streamId: String!, $objectId: String!) {
+    stream(id: $streamId){
+        object(id: $objectId){
+            data
+        }
+    }
+}

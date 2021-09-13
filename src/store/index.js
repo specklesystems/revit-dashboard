@@ -10,6 +10,7 @@ import {
   goToSpeckleAuthPage,
   speckleLogOut
 } from "@/speckleUtils";
+import router from "@/router";
 
 Vue.use(Vuex)
 
@@ -47,6 +48,7 @@ export default new Vuex.Store({
       context.commit("setCurrentStream", null)
       // Wipe the tokens
       speckleLogOut()
+      router.push("/login")
     },
     exchangeAccessCode(context, accessCode) {
       // Here, we could save the tokens to the store if necessary.

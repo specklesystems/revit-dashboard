@@ -1,40 +1,55 @@
-export const userInfoQuery = () => `query {
-      user {
-        name
-      },
-      serverInfo {
-        name
-        company
-      }
-    }`
-
-export const streamCommitsQuery = (streamId, itemsPerPage, cursor) => `query {
-                stream(id: "${streamId}"){
-                  commits(limit: ${itemsPerPage}, cursor: ${cursor ? '"' + cursor + '"' : null}) {
-                    totalCount
-                    cursor
-                    items{
-                      id
-                      message
-                      branchName
-                      sourceApplication
-                      referencedObject
-                      authorName
-                      createdAt
-                    }
-                  }
-                }
-              }`
 
 
-export const streamSearchQuery = (search) => `query {
-      streams(query: "${search}") {
+export const userInfoQuery = `
+  query {
+    user {
+      name
+    },
+    serverInfo {
+      name
+      company
+    }
+  }`
+
+export const streamCommitsQuery = `
+  query($id: String!, $limit: Int, $cursor: String) {
+    stream(id: $id){
+      name
+      updatedAt
+      id
+      commits(limit: $limit, cursor: $cursor) {
         totalCount
         cursor
-        items {
+        items{
           id
-          name
-          updatedAt
+          message
+          branchName
+          sourceApplication
+          referencedObject
+          authorName
+          createdAt
         }
       }
-    }`
+    }
+  }`
+
+export const streamSearchQuery = `
+  query($searchText: String!) {
+    streams(query: $searchText) {
+      totalCount
+      cursor
+      items {
+        id
+        name
+        updatedAt
+      }
+    }
+  }`
+
+export const streamObjectQuery = `query($streamId: String!, $objectId: String!) {
+    stream(id: $streamId){
+        object(id: $objectId){
+            data
+        }
+    }
+}`
