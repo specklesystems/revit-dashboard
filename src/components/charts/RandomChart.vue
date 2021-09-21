@@ -1,15 +1,15 @@
 <template>
   <div style="display: block">
-    <line-chart v-if="datacollection" :chart-data="datacollection" :options="options"></line-chart>
+    <doughnut-chart v-if="datacollection" :chart-data="datacollection" :options="options"></doughnut-chart>
   </div>
 </template>
 
 <script>
-import LineChart from './LineChart.js'
+import DoughnutChart from './DoughnutChart.js'
 
 export default {
   components: {
-    LineChart
+    DoughnutChart
   },
   data () {
     return {

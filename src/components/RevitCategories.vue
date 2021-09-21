@@ -7,7 +7,7 @@
 
 <script>
 import RandomChart from "@/components/charts/RandomChart";
-import Doughnut from "@/components/charts/LineChart";
+import Doughnut from "@/components/charts/DoughnutChart";
 import interpolate from "color-interpolate"
 
 function componentToHex(c) {
@@ -27,8 +27,28 @@ export default {
     return {
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         legend: {
-          display: false
+          position: 'right'
+        },
+        pieceLabel: {
+          // mode 'label', 'value' or 'percentage', default is 'percentage'
+          mode: 'value',
+
+          // precision for percentage, default is 0
+          precision: 0,
+
+          // font size, default is defaultFontSize
+          fontSize: 18,
+
+          // font color, default is '#fff'
+          fontColor: '#fff',
+
+          // font style, default is defaultFontStyle
+          fontStyle: 'bold',
+
+          // font family, default is defaultFontFamily
+          fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
         }
       },
       colorRange: interpolate(["#047EFB","#4caf50"])

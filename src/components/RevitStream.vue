@@ -17,14 +17,15 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col class="col-6">
+        <v-col class="col-12">
           <revit-categories :revit-data="refObj"></revit-categories>
         </v-col>
-        <v-col class="col-6">
-          <traverse-test :stream-id="streamId" :object="refObj"></traverse-test>
+        <v-col class="col-12">
+<!--          <traverse-test :stream-id="streamId" :object="refObj"></traverse-test>-->
+          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject"></object-loader-test>
         </v-col>
-        <v-col></v-col>
       </v-row>
+      <v-row><v-col></v-col></v-row>
     </v-container>
   </v-container>
 </template>
@@ -34,10 +35,11 @@ import {getStreamCommits, getStreamObject} from "@/speckleUtils";
 import RevitProjectInfo from "@/components/RevitProjectInfo";
 import RevitCategories from "@/components/RevitCategories";
 import TraverseTest from "@/components/TraverseTest";
+import ObjectLoaderTest from "@/components/ObjectLoaderTest";
 
 export default {
   name: "RevitStream",
-  components: {TraverseTest, RevitCategories, RevitProjectInfo},
+  components: {ObjectLoaderTest, RevitCategories, RevitProjectInfo},
   props: [ "streamId" ],
   data(){
     return {
@@ -113,5 +115,9 @@ export default {
   background-position: center;
   background-repeat: no-repeat;
   /*background-attachment: fixed;*/
+}
+.max-h {
+  max-height: 400px;
+  height: 400px;
 }
 </style>
