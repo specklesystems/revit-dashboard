@@ -1,6 +1,6 @@
 <template lang="html">
   <v-container class="home pa-6">
-    <revit-stream :stream-id="selectedStream ? selectedStream.id : null"/>
+    HOME!!
   </v-container>
 </template>
 
@@ -12,7 +12,6 @@ import RevitStream from "@/components/RevitStream"
 
 export default {
   name: 'Home',
-  components: {RevitStream},
   data: () => {
     return {
       serverUrl: process.env.VUE_APP_SERVER_URL,

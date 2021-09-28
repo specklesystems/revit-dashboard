@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import store from '../store/index.js'
 import WelcomeView from "@/components/WelcomeView";
+import RevitStream from "@/components/RevitStream";
 
 Vue.use(VueRouter)
 
@@ -12,13 +13,24 @@ const routes = [
     name: 'Home',
     component: Home,
     meta: {
-      isProtected: true
+      requiresAuth: true
     }
   },
   {
     path: '/login',
     name: 'Login',
-    component: WelcomeView
+    component: WelcomeView,
+    meta: {
+      requiresNoAuth: true
+    }
+  },
+  {
+    path: '/streams/:id',
+    name: 'Streams',
+    component: RevitStream,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 
@@ -28,26 +40,26 @@ const router = new VueRouter({
   routes
 })
 
-router.beforeEach( async (to, from, next) => {
-  if(to.query.access_code){
+router.beforeEach(async (to, from, next) => {
+  if (to.query.access_code) {
     // If the route contains an access code, exchange it
     try {
       await store.dispatch('exchangeAccessCode', to.query.access_code)
-    } catch (err){
+    } catch (err) {
       console.warn("exchange failed", err);
     }
     // Whatever happens, go home.
-    next("/")
+    return next("/")
   }
-  else if(to.meta.isProtected){
-    await store.dispatch("getUser")
-    var isAuth = store.getters.isAuthenticated
-    if(!isAuth) next("/login")
-    else next()
-  }
-  else {
-    next()
-  }
+  // Fetch if user is authenticated
+  await store.dispatch("getUser")
+  var isAuth = store.getters.isAuthenticated
+  if (to.meta.requiresAuth && !isAuth)
+    return next({name: "Login"})
+  else if (to.meta.requiresNoAuth && isAuth)
+    return next("/")
+  // Any other page
+  next()
 })
 
 export default router

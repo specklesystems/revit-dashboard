@@ -1,19 +1,9 @@
 <template>
   <v-container id="revitStream" class="pa-6">
-    <h2 class="pt-6 primary--text">
-      <span v-if="stream">
-        {{ stream.name }} — {{ stream.id }}
-        <v-btn outlined text small class="ml-3" :href="serverUrl+'/streams/'+stream.id">View in server</v-btn>
-        <v-btn outlined text small class="ml-3" color="error" @click="clearSelection">Clear selection</v-btn>
-      </span>
-      <span v-else>
-        <em>No stream selected. Find one using the search bar 👆🏼</em>
-      </span>
-    </h2>
     <v-container v-if="refObj">
       <v-row>
         <v-col>
-          <revit-project-info :info="refObj['@Project Information']"/>
+          <revit-project-info :info="refObj['@Project Information']" :stream="stream"/>
         </v-col>
       </v-row>
       <v-row>
@@ -40,7 +30,6 @@ import ObjectLoaderTest from "@/components/ObjectLoaderTest";
 export default {
   name: "RevitStream",
   components: {ObjectLoaderTest, RevitCategories, RevitProjectInfo},
-  props: [ "streamId" ],
   data(){
     return {
       stream: null,
@@ -55,6 +44,7 @@ export default {
     }
   },
   computed: {
+    streamId(){ return this.$route.params.id },
     isRevitCommit() { return this.selectedCommit?.sourceApplication?.startsWith("Revit")}
   },
   methods: {
@@ -64,9 +54,11 @@ export default {
       this.refObj = null
       this.selectedCommit = null
     },
+
     async getStream(){
       console.log(this.streamId)
       var res = await getStreamCommits(this.streamId,1,null)
+      console.log(res)
       console.log("commits", res.data.stream.commits.items)
       this.selectedCommit = res.data.stream.commits.items[0]
       this.stream = res.data.stream
