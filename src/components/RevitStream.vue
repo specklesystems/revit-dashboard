@@ -1,6 +1,6 @@
 <template>
-  <v-container id="revitStream" class="pa-6">
-    <v-container v-if="refObj">
+  <v-container id="revitStream" class="d-flex fill-height align-center justify-center">
+    <v-container v-if="refObj" v-show="!loading">
       <v-row>
         <v-col>
           <revit-project-info :info="refObj['@Project Information']" :stream="stream"/>
@@ -8,15 +8,17 @@
       </v-row>
       <v-row>
         <v-col class="col-12">
-          <revit-categories :revit-data="refObj"></revit-categories>
+          <revit-categories v-if="!loading" :revit-data="refObj"></revit-categories>
         </v-col>
         <v-col class="col-12">
-<!--          <traverse-test :stream-id="streamId" :object="refObj"></traverse-test>-->
-          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject"></object-loader-test>
+          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject" @loaded="loading = false" ></object-loader-test>
         </v-col>
       </v-row>
       <v-row><v-col></v-col></v-row>
     </v-container>
+    <div v-if="loading" class="d-flex justify-center align-center">
+      <v-progress-circular color="primary" indeterminate></v-progress-circular>
+    </div>
   </v-container>
 </template>
 
@@ -35,7 +37,8 @@ export default {
       stream: null,
       selectedCommit: null,
       refObj: null,
-      serverUrl: process.env.VUE_APP_SERVER_URL
+      serverUrl: process.env.VUE_APP_SERVER_URL,
+      loading: true
     }
   },
   async mounted(){
@@ -48,13 +51,6 @@ export default {
     isRevitCommit() { return this.selectedCommit?.sourceApplication?.startsWith("Revit")}
   },
   methods: {
-    clearSelection(){
-      this.$store.dispatch('clearStreamSelection')
-      this.stream = null
-      this.refObj = null
-      this.selectedCommit = null
-    },
-
     async getStream(){
       console.log(this.streamId)
       var res = await getStreamCommits(this.streamId,1,null)

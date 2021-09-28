@@ -35,7 +35,7 @@
     <v-row>
       <v-col>
         <v-card>
-          <v-card-title>Hi!</v-card-title>
+          <v-card-title>Volume</v-card-title>
         </v-card>
       </v-col>
     </v-row>
@@ -134,8 +134,9 @@ export default {
     const availableCategoriesAndTypes = {}
     for await (let obj of this.loader.getObjectIterator()) {
 
-      if (!total) total = obj.totalChildrenCount
-      console.log(`Progress: ${count++}/${total}`)
+      // if (!total) total = obj.totalChildrenCount
+      // console.log(`Progress: ${count++}/${total}`)
+
       // Objects per level
       if (obj.level) {
         var cat = obj.family || "None";
@@ -147,6 +148,7 @@ export default {
 
         objectsPerLevel[cat][lvl][obj.elementId] = obj
       }
+
       // Available types and categories
       if (obj.category) {
         if (!availableCategoriesAndTypes[obj.category]) availableCategoriesAndTypes[obj.category] = {}
@@ -156,9 +158,10 @@ export default {
         availableCategoriesAndTypes[obj.category][obj.family]++
       }
     }
+
     this.objsPerLevel = objectsPerLevel
     this.availableFamTypes = availableCategoriesAndTypes
-
+    this.$emit("loaded")
   }
 }
 </script>

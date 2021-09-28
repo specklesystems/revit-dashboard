@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col class="col-6">
-      <p>Stream details</p>
+      <span class="d-flex justify-center primary--text">Stream details</span>
       <v-card outlined>
         <v-card-title>
           {{ stream.name }}
@@ -12,7 +12,7 @@
       </v-card>
     </v-col>
     <v-col class="col-6">
-      <p>Project information</p>
+      <span class="d-flex justify-center primary--text">Project information</span>
       <v-card v-if="projectInfo" outlined>
         <v-card-title>{{ projectInfo.name }} {{ projectInfo.number }}<span
             class="d-flex align-center text-body-2 grey--text border pl-2">
