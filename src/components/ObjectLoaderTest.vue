@@ -5,7 +5,8 @@
         <v-card max-height="500px">
           <v-card-title>Elements Per Level/Category</v-card-title>
           <v-card-text>
-            <horizontal-barchart v-if="objsByLevelData" :chart-data="objsByLevelData" :options="options"></horizontal-barchart>
+            <horizontal-barchart v-if="objsByLevelData" :chart-data="objsByLevelData"
+                                 :options="options"></horizontal-barchart>
           </v-card-text>
         </v-card>
       </v-col>
@@ -23,7 +24,7 @@
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <ul>
-                    <li v-for="(count, type) in item" :key="type">{{type}}: {{count}}</li>
+                    <li v-for="(count, type) in item" :key="type">{{ type }}: {{ count }}</li>
                   </ul>
                 </v-expansion-panel-content>
               </v-expansion-panel>
@@ -49,7 +50,7 @@ export default {
     return {
       loader: null,
       objsPerLevel: null,
-      colorRange: interpolate(["#047EFB","#4caf50"]),
+      colorRange: interpolate(["#047EFB", "#4caf50"]),
       availableLevels: null,
       availableFamTypes: null,
       options: {
@@ -107,11 +108,20 @@ export default {
   async mounted() {
     this.processStreamObjects()
   },
-  updated() {
-    //this.processStreamObjects()
+  watch: {
+    streamId: {
+      handler: function (val, oldVal) {
+        this.processStreamObjects()
+      }
+    },
+    objectId: {
+      handler: function (val, oldVal) {
+        this.processStreamObjects()
+      }
+    }
   },
   methods: {
-    async processStreamObjects(){
+    async processStreamObjects() {
       this.$emit("loaded", false)
       this.loader = new ObjectLoader({
         serverUrl: process.env.VUE_APP_SERVER_URL,
@@ -168,6 +178,7 @@ export default {
   overflow: scroll;
   padding: 1em;
 }
+
 .v-card {
   display: flex !important;
   flex-direction: column;

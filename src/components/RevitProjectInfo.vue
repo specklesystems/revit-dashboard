@@ -12,10 +12,8 @@
         </v-card-subtitle>
         <v-card-text class="d-flex flex-column flex-fill">
           <div style="min-height: 200px; height:100%">
-
-          <renderer :object-urls="objectUrl"/>
+            <renderer :object-urls="objectUrl"/>
           </div>
-
         </v-card-text>
       </v-card>
     </v-col>
@@ -85,7 +83,6 @@ export default {
         if (!val) return
         var id = this.$route.params.id
         var res = await getStreamObject(id, this.info[0].referencedId)
-        console.log(res)
         this.projectInfo = res
       }
     }

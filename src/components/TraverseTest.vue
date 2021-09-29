@@ -21,7 +21,6 @@ export default {
   },
   async mounted() {
     if (this.object) {
-      console.log("traversing!!")
       this.traverseResult = await traverseAndMatch(
           this.streamId,
           this.object["@Floors"],

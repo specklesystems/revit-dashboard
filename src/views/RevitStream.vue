@@ -58,10 +58,7 @@ export default {
   },
   methods: {
     async getStream(){
-      console.log(this.streamId)
       var res = await getStreamCommits(this.streamId,1,null)
-      console.log(res)
-      console.log("commits", res.data.stream.commits.items)
       this.selectedCommit = res.data.stream.commits.items[0]
       this.stream = res.data.stream
     },
@@ -80,7 +77,6 @@ export default {
         headers: token ? { Authorization: `Bearer ${token}`, 'Access-Control-Allow-Origin': '*' } : {'Access-Control-Allow-Origin': '*'}
       })
       const blob = await res.blob()
-      console.log(blob)
       const imgUrl = URL.createObjectURL(blob)
       if (this.$refs.cover) this.$refs.cover.style.backgroundImage = `url('${imgUrl}')`
     },
@@ -88,13 +84,11 @@ export default {
   watch: {
     streamId: {
       handler: async function(val, oldVal) {
-        console.log("streamId changed", val, oldVal)
         if(val) this.getStream()
       }
     },
     selectedCommit: {
       handler: async function (val, oldVal) {
-        console.log("selectedCommit changed")
         var obj = await getStreamObject(this.stream.id, this.selectedCommit.referencedObject)
         this.refObj = obj
         //this.getPreviewImage(0)

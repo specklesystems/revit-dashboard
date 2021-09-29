@@ -18,7 +18,6 @@ export async function traverseAndMatch(streamId, speckleObj, matchFunction, igno
 
   // Traverse all objects in an array individually
   if (Array.isArray(speckleObj)) {
-    console.log("its an array!")
     for (let i = 0; i < speckleObj.length; i++) {
       const obj = speckleObj[i];
       if (!obj.speckle_type) return
@@ -33,7 +32,6 @@ export async function traverseAndMatch(streamId, speckleObj, matchFunction, igno
     return result;
   }
 
-  console.log("traverse obj ", speckleObj)
   var temp = speckleObj
   // Handle speckle reference objects, overrite 'temp' with fetched object
   if (speckleObj.speckle_type === "reference") {
@@ -51,7 +49,6 @@ export async function traverseAndMatch(streamId, speckleObj, matchFunction, igno
   // Check if the object matches
   if (matchFunction(temp)) {
     // YES! Add to result
-    console.log("it's a match!!", temp)
     result[temp.elementId] = temp;
   } else {
     //Not a match: Traverse the object keys
