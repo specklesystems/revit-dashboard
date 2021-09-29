@@ -1,9 +1,17 @@
 <template>
   <v-container id="revitStream" class="d-flex fill-height align-center justify-center">
+    <div v-if="!loading && !isRevitCommit" class="d-flex justify-center align-center">
+      The latest commit on this stream does not come from Revit.
+    </div>
+    <div v-else-if="loading" class="d-flex flex-column justify-center align-center">
+      <v-progress-circular color="primary" indeterminate></v-progress-circular>
+      <p class="body-2 mt-2 primary--text">Processing your data...</p>
+    </div>
+
     <v-container v-if="refObj" v-show="!loading">
       <v-row>
         <v-col>
-          <revit-project-info :info="refObj['@Project Information']" :stream="stream"/>
+          <revit-project-info v-if="!loading" :info="refObj['@Project Information']" :stream="stream"/>
         </v-col>
       </v-row>
       <v-row>
@@ -11,14 +19,12 @@
           <revit-categories v-if="!loading" :revit-data="refObj"></revit-categories>
         </v-col>
         <v-col class="col-12">
-          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject" @loaded="loading = false" ></object-loader-test>
+          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject" @loaded="loading = !$event" ></object-loader-test>
         </v-col>
       </v-row>
       <v-row><v-col></v-col></v-row>
     </v-container>
-    <div v-if="loading" class="d-flex justify-center align-center">
-      <v-progress-circular color="primary" indeterminate></v-progress-circular>
-    </div>
+
   </v-container>
 </template>
 

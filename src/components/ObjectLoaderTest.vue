@@ -32,13 +32,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col>
-        <v-card>
-          <v-card-title>Volume</v-card-title>
-        </v-card>
-      </v-col>
-    </v-row>
   </v-container>
 
 </template>
@@ -78,11 +71,6 @@ export default {
       },
     }
   },
-  methods: {
-    getRandomInt() {
-      return Math.floor(Math.random() * (50 - 5 + 1)) + 5
-    }
-  },
   computed: {
     objsByLevelData() {
       // Fast exit if no object has been set yet
@@ -117,51 +105,60 @@ export default {
     }
   },
   async mounted() {
-    this.loader = new ObjectLoader({
-      serverUrl: process.env.VUE_APP_SERVER_URL,
-      streamId: this.streamId,
-      objectId: this.objectId
-    })
-    var total = 0
-    var count = 0
+    this.processStreamObjects()
+  },
+  updated() {
+    //this.processStreamObjects()
+  },
+  methods: {
+    async processStreamObjects(){
+      this.$emit("loaded", false)
+      this.loader = new ObjectLoader({
+        serverUrl: process.env.VUE_APP_SERVER_URL,
+        streamId: this.streamId,
+        objectId: this.objectId
+      })
+      var total = 0
+      var count = 0
 
-    function shouldIgnore(obj) {
-      return obj.speckle_type.startsWith("Objects.Geometry") ||
-          obj.speckle_type.endsWith("DataChunk")
-    }
-
-    const objectsPerLevel = {}
-    const availableCategoriesAndTypes = {}
-    for await (let obj of this.loader.getObjectIterator()) {
-
-      // if (!total) total = obj.totalChildrenCount
-      // console.log(`Progress: ${count++}/${total}`)
-
-      // Objects per level
-      if (obj.level) {
-        var cat = obj.family || "None";
-        var lvl = obj.level.name
-        if (!objectsPerLevel[cat])
-          objectsPerLevel[cat] = {}
-        if (!objectsPerLevel[cat][lvl])
-          objectsPerLevel[cat][lvl] = {}
-
-        objectsPerLevel[cat][lvl][obj.elementId] = obj
+      function shouldIgnore(obj) {
+        return obj.speckle_type.startsWith("Objects.Geometry") ||
+            obj.speckle_type.endsWith("DataChunk")
       }
 
-      // Available types and categories
-      if (obj.category) {
-        if (!availableCategoriesAndTypes[obj.category]) availableCategoriesAndTypes[obj.category] = {}
-        if (!availableCategoriesAndTypes[obj.category][obj.family]) {
-          availableCategoriesAndTypes[obj.category][obj.family] = 0
+      const objectsPerLevel = {}
+      const availableCategoriesAndTypes = {}
+
+      for await (let obj of this.loader.getObjectIterator()) {
+        // if (!total) total = obj.totalChildrenCount
+        // console.log(`Progress: ${count++}/${total}`)
+
+        // Objects per level
+        if (obj.level) {
+          var cat = obj.family || "None";
+          var lvl = obj.level.name
+          if (!objectsPerLevel[cat])
+            objectsPerLevel[cat] = {}
+          if (!objectsPerLevel[cat][lvl])
+            objectsPerLevel[cat][lvl] = {}
+
+          objectsPerLevel[cat][lvl][obj.elementId] = obj
         }
-        availableCategoriesAndTypes[obj.category][obj.family]++
-      }
-    }
 
-    this.objsPerLevel = objectsPerLevel
-    this.availableFamTypes = availableCategoriesAndTypes
-    this.$emit("loaded")
+        // Available types and categories
+        if (obj.category) {
+          if (!availableCategoriesAndTypes[obj.category]) availableCategoriesAndTypes[obj.category] = {}
+          if (!availableCategoriesAndTypes[obj.category][obj.family]) {
+            availableCategoriesAndTypes[obj.category][obj.family] = 0
+          }
+          availableCategoriesAndTypes[obj.category][obj.family]++
+        }
+      }
+
+      this.objsPerLevel = objectsPerLevel
+      this.availableFamTypes = availableCategoriesAndTypes
+      this.$emit("loaded", true)
+    }
   }
 }
 </script>

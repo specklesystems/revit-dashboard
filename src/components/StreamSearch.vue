@@ -25,10 +25,10 @@
           <v-row class="pa-0 ma-0">
             {{ item.name }}
             <v-spacer></v-spacer>
-            <span class="streamid">{{ item.id }}</span>
+            <span class="primary rounded white--text pl-1 pr-1 caption">{{ item.id }}</span>
           </v-row>
         </v-list-item-title>
-        <v-list-item-subtitle class="caption">
+        <v-list-item-subtitle class="caption primary--text">
           Updated
           <timeago :datetime="item.updatedAt"></timeago>
         </v-list-item-subtitle>

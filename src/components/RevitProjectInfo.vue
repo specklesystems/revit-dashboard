@@ -1,49 +1,80 @@
 <template>
   <v-row>
     <v-col class="col-6">
-      <span class="d-flex justify-center primary--text">Stream details</span>
-      <v-card outlined>
+      <v-card outlined class="d-flex flex-column fill-height">
+        <span class="d-flex justify-center grey--text body-2 mb-0 mt-1">Stream details</span>
         <v-card-title>
           {{ stream.name }}
-          <v-btn outlined text small class="ml-3" :href="serverUrl+'/streams/'+stream.id">View in server</v-btn>
+          <v-btn outlined color="primary" x-small class="ml-3" :href="serverUrl+'/streams/'+stream.id" target="_blank">View in Speckle.xyz</v-btn>
         </v-card-title>
         <v-card-subtitle>
+          You are viewing the latest commit on this stream
         </v-card-subtitle>
+        <v-card-text class="d-flex flex-column flex-fill">
+          <div style="min-height: 200px; height:100%">
+
+          <renderer :object-urls="objectUrl"/>
+          </div>
+
+        </v-card-text>
       </v-card>
     </v-col>
-    <v-col class="col-6">
-      <span class="d-flex justify-center primary--text">Project information</span>
-      <v-card v-if="projectInfo" outlined>
-        <v-card-title>{{ projectInfo.name }} {{ projectInfo.number }}<span
-            class="d-flex align-center text-body-2 grey--text border pl-2">
+    <v-col class="col-6 d-flex flex-column">
+        <v-card v-if="projectInfo" outlined class="d-flex flex-column fill-height">
+          <span class="d-flex justify-center grey--text body-2 mb-0 mt-1">Revit project overview</span>
+          <v-card-title>{{ projectInfo.name }} {{ projectInfo.number }}<span
+              class="d-flex align-center text-body-2 grey--text border pl-2">
           <v-icon size="medium" color="grey"
                   class="pr-1">mdi-home-circle-outline</v-icon>{{ projectInfo.address }}</span>
-        </v-card-title>
-        <v-card-subtitle class="d-flex aling-center">
-          <v-icon size="small" class="pr-1">mdi-account-circle-outline</v-icon>
-          {{ projectInfo.author }}
-          <v-icon size="small" class="pr-1 pl-2">mdi-calendar-check-outline</v-icon>
-          {{ projectInfo.status }}
-        </v-card-subtitle>
-      </v-card>
-      <v-card v-else>
-        <v-card-subtitle>No project info was sent on this commit</v-card-subtitle>
-      </v-card>
+          </v-card-title>
+          <v-card-subtitle class="d-flex align-center">
+            <v-icon size="small" class="pr-1">mdi-account-circle-outline</v-icon>
+            {{ projectInfo.author }}
+            <v-icon size="small" class="pr-1 pl-2">mdi-calendar-check-outline</v-icon>
+            {{ projectInfo.status }}
+          </v-card-subtitle>
+          <v-row wrap dense class="d-flex align-center justify-center ma-3">
+            <v-col v-for="(item, key) in overviewData" :key="key" class="col-4 d-flex flex-column justify-center align-center flex-fill">
+              <div class="d-flex flex-column justify-center align-center flex-fill">
+                <p class="text-h3 mb-0 primary--text">{{ item }}</p>
+                <p class="pb-0 ma-0 primary--text caption">{{ key.toUpperCase() }}</p>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
+        <v-card v-else outlined class="d-flex justify-center align-center" height="100%">
+          <v-card-subtitle>No project info was sent on this commit</v-card-subtitle>
+        </v-card>
     </v-col>
   </v-row>
 </template>
 
 <script>
 import {getStreamObject} from "@/speckleUtils";
+import Renderer from "@/components/Renderer";
 
 export default {
   name: "RevitProjectInfo",
-  components: {},
+  components: {Renderer},
   props: ["info", "stream"],
   data() {
     return {
       projectInfo: null,
-      serverUrl: process.env.VUE_APP_SERVER_URL
+      serverUrl: process.env.VUE_APP_SERVER_URL,
+      overviewData: {
+        "families": 23,
+        "objects": 21,
+        "views": 4,
+        "more": 44,
+        "and..": 452,
+        "xx": 434
+
+      }
+    }
+  },
+  computed: {
+    objectUrl() {
+      return [`${this.serverUrl}/streams/${this.stream.id}/objects/${this.stream.commits.items[0].referencedObject}`]
     }
   },
   watch: {

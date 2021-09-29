@@ -2,8 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import store from '../store/index.js'
-import WelcomeView from "@/components/WelcomeView";
-import RevitStream from "@/components/RevitStream";
+import WelcomeView from "@/views/WelcomeView";
+import RevitStream from "@/views/RevitStream";
 
 Vue.use(VueRouter)
 

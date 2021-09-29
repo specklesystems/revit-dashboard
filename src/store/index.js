@@ -1,11 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import VuexPersistence from 'vuex-persist'
 
 import {
-  APP_NAME,
   exchangeAccessCode,
-  getStreamCommits,
   getUserData,
   goToSpeckleAuthPage,
   speckleLogOut
@@ -14,17 +11,11 @@ import router from "@/router";
 
 Vue.use(Vuex)
 
-const vuexLocal = new VuexPersistence({
-  storage: window.localStorage,
-  key: `${APP_NAME}.vuex`
-})
 
 export default new Vuex.Store({
-  plugins: [vuexLocal.plugin],
   state: {
     user: null,
-    serverInfo: null,
-    currentStream: null,
+    serverInfo: null
   },
   getters: {
     isAuthenticated: (state) => state.user != null
@@ -35,9 +26,6 @@ export default new Vuex.Store({
     },
     setServerInfo(state, info) {
       state.serverInfo = info
-    },
-    setCurrentStream(state, stream) {
-      state.currentStream = stream
     }
   },
   actions: {
@@ -45,7 +33,6 @@ export default new Vuex.Store({
       // Wipe the state
       context.commit("setUser", null)
       context.commit("setServerInfo", null)
-      context.commit("setCurrentStream", null)
       // Wipe the tokens
       speckleLogOut()
       router.push("/login")
@@ -66,12 +53,6 @@ export default new Vuex.Store({
     },
     redirectToAuth() {
       goToSpeckleAuthPage()
-    },
-    async handleStreamSelection(context, stream) {
-      context.commit("setCurrentStream", stream)
-    },
-    clearStreamSelection(context){
-      context.commit("setCurrentStream", null)
     }
   },
   modules: {}

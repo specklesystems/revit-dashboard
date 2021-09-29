@@ -1,32 +1,5 @@
 <template lang="html">
   <v-sheet style="height: 100%; position: relative" class="transparent">
-    <v-menu v-if="!embeded" bottom left close-on-click offset-y>
-      <template #activator="{ on: onMenu, attrs: menuAttrs }">
-        <v-tooltip left color="primary">
-          <template #activator="{ on: onTooltip, attrs: tooltipAttrs }">
-            <v-btn
-                style="position: absolute; bottom: 1em; right: 1em; z-index: 3"
-                color="primary"
-                fab
-                x-small
-                v-bind="{ ...tooltipAttrs, ...menuAttrs }"
-                v-on="{ ...onTooltip, ...onMenu }"
-            >
-              <v-icon small>mdi-share-variant</v-icon>
-            </v-btn>
-          </template>
-          Embed 3D Viewer
-        </v-tooltip>
-      </template>
-      <v-list dense>
-        <v-list-item @click="copyIFrame">
-          <v-list-item-title>Copy iframe</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="copyEmbedUrl">
-          <v-list-item-title>Copy URL</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
     <v-alert
         v-show="showAlert"
         text
@@ -54,11 +27,10 @@
                 color="primary"
                 class="vertical-center"
                 style="pointer-events: all"
-                fab
                 small
                 @click="load()"
             >
-              <v-icon>mdi-play</v-icon>
+              <v-icon dense>mdi-play</v-icon>
             </v-btn>
           </div>
         </div>
@@ -143,14 +115,6 @@
             </template>
             Show / Hide Section plane
           </v-tooltip>
-          <v-tooltip v-if="!embeded" top>
-            <template #activator="{ on, attrs }">
-              <v-btn small v-bind="attrs" @click="fullScreen = !fullScreen" v-on="on">
-                <v-icon small>{{ fullScreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}</v-icon>
-              </v-btn>
-            </template>
-            Full screen
-          </v-tooltip>
           <v-tooltip top>
             <template #activator="{ on, attrs }">
               <v-btn v-bind="attrs" small @click="showHelp = !showHelp" v-on="on">
@@ -192,6 +156,8 @@
 </template>
 <script>
 import throttle from 'lodash.throttle'
+import {Viewer} from '@speckle/viewer'
+import {TOKEN} from "@/speckleUtils";
 
 export default {
   props: {
@@ -199,8 +165,8 @@ export default {
       type: Boolean,
       default: false
     },
-    objectUrl: {
-      type: String,
+    objectUrls: {
+      type: Array,
       default: null
     },
     unloadTrigger: {
@@ -236,24 +202,6 @@ export default {
     },
     darkMode() {
       return this.$vuetify.theme.dark
-    },
-    url() {
-      var stream = this.$route.params.streamId
-      var base = `${window.location.origin}/embed?stream=${stream}`
-
-      var object = this.$route.params.objectId
-      if (object) return base + `&object=${object}`
-
-      var commit = this.$route.params.commitId
-      if (commit) return base + `&commit=${commit}`
-
-      var branch = this.$route.params.branchName
-      if (branch) return base + `&branch=${encodeURI(branch)}`
-
-      return base
-    },
-    embedUrl() {
-      return this.url
     }
   },
   watch: {
@@ -268,6 +216,10 @@ export default {
         let views = window.__viewer.interactions.getViews()
         this.namedViews.push(...views)
       }
+    },
+    objectUrls(){
+      this.unloadData()
+      this.load()
     }
   },
   // TODO: pause rendering on destroy, reinit on mounted.
@@ -295,21 +247,8 @@ export default {
     }
 
     window.__viewer.onWindowResize()
+    this.setupEvents()
 
-    if (window.__viewerLastLoadedUrl !== this.objectUrl) {
-      window.__viewer.sceneManager.removeAllObjects()
-      window.__viewerLastLoadedUrl = null
-      this.getPreviewImage().then().catch()
-    } else {
-      this.hasLoadedModel = true
-      this.loadProgress = 100
-      this.setupEvents()
-    }
-    if (this.$route.query.embed) {
-      this.fullScreen = true
-      //TODO: Remove overflow from window
-      document.body.classList.add('no-scrollbar')
-    }
   },
   beforeDestroy() {
     // NOTE: here's where we juggle the container div out, and do cleanup on the
@@ -320,23 +259,6 @@ export default {
     document.body.appendChild(this.domElement)
   },
   methods: {
-    async getPreviewImage(angle) {
-      angle = angle || 0
-      let previewUrl = this.objectUrl.replace('streams', 'preview') + '/' + angle
-      let token = undefined
-      try {
-        token = localStorage.getItem('AuthToken')
-      } catch (e) {
-        console.warn('Sanboxed mode, only public streams will fetch properly.')
-      }
-      const res = await fetch(previewUrl, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      })
-      const blob = await res.blob()
-      const imgUrl = URL.createObjectURL(blob)
-      if (this.$refs.cover) this.$refs.cover.style.backgroundImage = `url('${imgUrl}')`
-      this.hasImg = true
-    },
     zoomEx() {
       window.__viewer.interactions.zoomExtents()
     },
@@ -374,10 +296,12 @@ export default {
       })
     },
     load() {
-      if (!this.objectUrl) return
+      if (!this.objectUrls || this.objectUrls.length === 0) return
       this.hasLoadedModel = true
-      window.__viewer.loadObject(this.objectUrl)
-      window.__viewerLastLoadedUrl = this.objectUrl
+      this.objectUrls?.forEach(url => {
+        window.__viewer.loadObject(url, localStorage.getItem(TOKEN))
+        window.__viewerLastLoadedUrl = url
+      })
 
       this.setupEvents()
     },
@@ -386,17 +310,6 @@ export default {
       this.hasLoadedModel = false
       this.loadProgress = 0
       this.namedViews.splice(0, this.namedViews.length)
-    },
-    copyEmbedUrl() {
-      navigator.clipboard.writeText(this.embedUrl).then(() => {
-        //TODO: Show vuetify notification
-      })
-    },
-    copyIFrame() {
-      var frameCode = `<iframe src="${this.embedUrl}" width=600 height=400></iframe>`
-      navigator.clipboard.writeText(frameCode).then(() => {
-        //TODO: Show vuetify notification
-      })
     }
   }
 }

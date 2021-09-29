@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@speckle/objectloader": "2.0.3",
-    "@speckle/viewer": "^2.1.1",
+    "@speckle/viewer": "2.0.12",
     "chart.js": "^2.9.4",
     "color-interpolate": "^1.0.5",
     "colorjs.io": "^0.0.3",

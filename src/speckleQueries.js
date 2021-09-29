@@ -4,6 +4,9 @@ export const userInfoQuery = `
   query {
     user {
       name
+      id
+      avatar
+      email
     },
     serverInfo {
       name
@@ -50,6 +53,20 @@ export const streamObjectQuery = `query($streamId: String!, $objectId: String!) 
     stream(id: $streamId){
         object(id: $objectId){
             data
+        }
+    }
+}`
+
+export const latestStreamsQuery = `query {
+    streams(limit: 10){
+        cursor
+        totalCount
+        items {
+            id
+            name
+            description
+            createdAt
+            updatedAt
         }
     }
 }`

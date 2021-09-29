@@ -1,4 +1,10 @@
-import {streamCommitsQuery, streamObjectQuery, streamSearchQuery, userInfoQuery} from "@/speckleQueries";
+import {
+  latestStreamsQuery,
+  streamCommitsQuery,
+  streamObjectQuery,
+  streamSearchQuery,
+  userInfoQuery
+} from "@/speckleQueries";
 
 export const APP_NAME = process.env.VUE_APP_SPECKLE_NAME
 export const SERVER_URL = process.env.VUE_APP_SERVER_URL
@@ -84,4 +90,4 @@ export const getStreamCommits = (streamId, itemsPerPage, cursor) => speckleFetch
 
 export const getStreamObject = (streamId, objectId) => speckleFetch(streamObjectQuery, {streamId, objectId}).then(res => res.data?.stream?.object?.data)
 
-
+export const getStreams = () => speckleFetch(latestStreamsQuery).then(res => res.data?.streams)
