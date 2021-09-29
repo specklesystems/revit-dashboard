@@ -9,7 +9,7 @@
       <router-link to="/">
         <v-btn text>
           <v-img class="mr-2" src="@/assets/img.png" height="24" width="24"/>
-          <h3 class="text--white">Speckle</h3>
+          <h3 class="text--white">Revit Dash</h3>
         </v-btn>
       </router-link>
 
@@ -21,6 +21,7 @@
 
       <v-btn
           class="ma-2"
+          small
           outlined
           v-if="!isAuthenticated"
           @click="$store.dispatch('redirectToAuth')"

@@ -1,7 +1,9 @@
 <template>
   <v-card>
     <v-card-title>Objects by category</v-card-title>
-    <v-card-text><doughnut :options="options" :chart-data="chartData"></doughnut></v-card-text>
+    <v-card-text>
+      <doughnut ref="doughnut" :options="options" :chart-data="chartData"></doughnut>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -23,13 +25,20 @@ export default {
   name: "RevitCategories",
   components: {Doughnut},
   props: ["revitData"],
+
   data(){
     return {
       options: {
         responsive: true,
         maintainAspectRatio: false,
         legend: {
-          position: 'right'
+          position: 'right',
+          onClick: (e, legendItem) => {1
+            console.log("legend item clicked",e, legendItem, this.$refs.doughnut.$data._chart)
+            const chart = this.$refs.doughnut.$data._chart
+
+            this.$emit("legend-clicked", e, legendItem)
+          }
         },
         pieceLabel: {
           // mode 'label', 'value' or 'percentage', default is 'percentage'
