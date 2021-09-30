@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col class="col-6">
+    <v-col lg="6" sm="12" xs="12">
       <v-card outlined class="d-flex flex-column fill-height">
         <span class="d-flex justify-center grey--text body-2 mb-0 mt-1">Stream details</span>
         <v-card-title>
@@ -17,7 +17,7 @@
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col class="col-6 d-flex flex-column">
+    <v-col lg="6" sm="12" xs="12" class="d-flex flex-column">
         <v-card v-if="projectInfo" outlined class="d-flex flex-column fill-height">
           <span class="d-flex justify-center grey--text body-2 mb-0 mt-1">Revit project overview</span>
           <v-card-title>{{ projectInfo.name }} {{ projectInfo.number }}<span

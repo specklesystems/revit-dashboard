@@ -1,12 +1,8 @@
 <template>
   <div>
+    <revit-project-info :info="info" :stream="stream" :totals="totals"/>
     <v-row>
-      <v-col>
-        <revit-project-info :info="info" :stream="stream" :totals="totals"/>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
+      <v-col cols="12">
         <v-card max-height="500px" outlined>
           <v-card-title>Objects by category</v-card-title>
           <v-card-text>
@@ -15,9 +11,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col class="col-6">
+      <v-col lg="6" sm="12" xs="12">
         <v-card max-height="500px" min-height="500px" outlined>
           <v-card-title>Elements Per Level/Category</v-card-title>
           <v-card-text>
@@ -26,9 +20,9 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col class="col-6">
+      <v-col lg="6" sm="12" xs="12">
         <v-card max-height="500px" min-height="500px" outlined>
-          <v-card-title>Available Families and Types</v-card-title>
+          <v-card-title>Families and Types</v-card-title>
           <v-card-subtitle>
             <v-text-field dense clearable prepend-icon="mdi-filter" placeholder="Filter all family types"
                           v-model="typeFilter"></v-text-field>
@@ -251,9 +245,9 @@ export default {
       var totalElements = 0
       var total = 0
       var count = 0
-      var d = debounce(()=> {
+      var d = debounce(() => {
 
-      },10)
+      }, 10)
       for await (let obj of this.loader.getObjectIterator()) {
         if (!total) total = obj.totalChildrenCount
         var progress = Math.floor((count * 100) / total)
