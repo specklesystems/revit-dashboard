@@ -15,14 +15,17 @@
         </v-col>
       </v-row>
       <v-row>
+        <!--        <v-col class="col-12">-->
+        <!--          <revit-categories v-if="!loading" :revit-data="refObj" @legend-clicked="onLegendClick"></revit-categories>-->
+        <!--        </v-col>-->
         <v-col class="col-12">
-          <revit-categories v-if="!loading" :revit-data="refObj" @legend-clicked="onLegendClick"></revit-categories>
-        </v-col>
-        <v-col class="col-12">
-          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject" @loaded="loading = !$event" ></object-loader-test>
+          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject"
+                              @loaded="loading = !$event" @legend-clicked="onLegendClick"></object-loader-test>
         </v-col>
       </v-row>
-      <v-row><v-col></v-col></v-row>
+      <v-row>
+        <v-col></v-col>
+      </v-row>
     </v-container>
 
   </v-container>
@@ -31,15 +34,13 @@
 <script>
 import {getStreamCommits, getStreamObject} from "@/speckleUtils";
 import RevitProjectInfo from "@/components/RevitProjectInfo";
-import RevitCategories from "@/components/RevitCategories";
-import TraverseTest from "@/components/TraverseTest";
 import ObjectLoaderTest from "@/components/ObjectLoaderTest";
 import Chart from "chart.js"
 
 export default {
   name: "RevitStream",
-  components: {ObjectLoaderTest, RevitCategories, RevitProjectInfo},
-  data(){
+  components: {ObjectLoaderTest, RevitProjectInfo},
+  data() {
     return {
       stream: null,
       selectedCommit: null,
@@ -48,22 +49,25 @@ export default {
       loading: true
     }
   },
-  async mounted(){
-    if(this.streamId){
+  async mounted() {
+    if (this.streamId) {
       this.getStream()
     }
   },
   computed: {
-    streamId(){ return this.$route.params.id },
-    isRevitCommit() { return this.selectedCommit?.sourceApplication?.startsWith("Revit")}
+    streamId() {
+      return this.$route.params.id
+    },
+    isRevitCommit() {
+      return this.selectedCommit?.sourceApplication?.startsWith("Revit")
+    }
   },
   methods: {
-    async onLegendClick(e, legendItem){
-      console.log("legend click event", e, legendItem)
-      Chart.helpers.each(Chart.instances, function(instance){
-        console.log(instance.chart)
+    async onLegendClick(e, legendItem) {
+      Chart.helpers.each(Chart.instances, function (instance) {
         var chart = instance.chart
-        const index = legendItem.index;
+        const index = chart.legend.legendItems.findIndex(element => element.text === legendItem.text);
+        if (index === -1) return
         const {
           type
         } = chart.config;
@@ -78,7 +82,6 @@ export default {
             }
           }
         } else {
-          const index = legendItem.index;
           const meta = chart.getDatasetMeta(index);
 
           // See controller.isDatasetVisible comment
@@ -89,8 +92,8 @@ export default {
         chart.update();
       })
     },
-    async getStream(){
-      var res = await getStreamCommits(this.streamId,1,null)
+    async getStream() {
+      var res = await getStreamCommits(this.streamId, 1, null)
       this.selectedCommit = res.data.stream.commits.items[0]
       this.stream = res.data.stream
     },
@@ -106,7 +109,10 @@ export default {
       }
       const res = await fetch(previewUrl, {
         mode: "cors",
-        headers: token ? { Authorization: `Bearer ${token}`, 'Access-Control-Allow-Origin': '*' } : {'Access-Control-Allow-Origin': '*'}
+        headers: token ? {
+          Authorization: `Bearer ${token}`,
+          'Access-Control-Allow-Origin': '*'
+        } : {'Access-Control-Allow-Origin': '*'}
       })
       const blob = await res.blob()
       const imgUrl = URL.createObjectURL(blob)
@@ -115,8 +121,8 @@ export default {
   },
   watch: {
     streamId: {
-      handler: async function(val, oldVal) {
-        if(val) this.getStream()
+      handler: async function (val, oldVal) {
+        if (val) this.getStream()
       }
     },
     selectedCommit: {
@@ -136,6 +142,7 @@ export default {
   background-repeat: no-repeat;
   /*background-attachment: fixed;*/
 }
+
 .max-h {
   max-height: 400px;
   height: 400px;
