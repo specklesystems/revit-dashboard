@@ -1,17 +1,22 @@
 <template>
-  <v-container id="revitStream" style="width: 100%">
-    <div v-if="!isRevitCommit" class="primary--text">
-      The latest commit on this stream does not come from Revit.
+  <v-container id="revitStream" style="width: 100%" class="d-flex fill-height justify-center align-center">
+    <div v-if="!isRevitCommit" class="d-flex flex-column justify-center primary--text">
+      <v-icon color="primary">mdi-x</v-icon>
+      <p class="headline">The latest commit on this stream does not come from Revit.</p>
+      <p class="text-center">
+      <v-btn link to="/" outlined color="primary"><v-icon small left>mdi-home</v-icon>Go home</v-btn>
+      </p>
     </div>
-    <div v-else-if="loading" class="d-flex flex-column justify-center align-center">
-      <v-progress-circular color="primary" indeterminate></v-progress-circular>
+    <div v-else-if="loading" class="d-flex flex-column fill-height justify-center align-center">
+      <v-progress-linear size="50" color="primary" :value="progress"></v-progress-linear>
       <p class="body-2 mt-2 primary--text">Processing your data...</p>
     </div>
-    <div v-if="refObj && isRevitCommit" v-show="!loading">
+    <div v-if="isRevitCommit && refObj" v-show="!loading">
       <revit-dashboard v-if="selectedCommit"
                           :stream-id="streamId"
                           :object-id="selectedCommit.referencedObject"
                           @loaded="loading = !$event"
+                          @progress="progress = $event"
                           @legend-clicked="onLegendClick"
                           :info="refObj['@Project Information']"
                           :stream="stream">
@@ -35,7 +40,8 @@ export default {
       selectedCommit: null,
       refObj: null,
       serverUrl: process.env.VUE_APP_SERVER_URL,
-      loading: true
+      loading: true,
+      progress: 0
     }
   },
   async mounted() {

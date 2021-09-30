@@ -34,7 +34,7 @@
           <v-row wrap dense class="d-flex align-center justify-center ma-3">
             <v-col v-for="(item, key) in totals" :key="key" class="col-4 d-flex flex-column justify-center align-center flex-fill">
               <div class="d-flex flex-column justify-center align-center flex-fill">
-                <p class="text-lg-h1 text-md-h2 mb-0 primary--text">{{ item }}</p>
+                <p class="text-md-h2 mb-0 primary--text">{{ item }}</p>
                 <p class="pb-0 ma-0 primary--text caption">{{ key.toUpperCase() }}</p>
               </div>
             </v-col>

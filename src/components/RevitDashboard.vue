@@ -48,6 +48,17 @@ import HorizontalBarchart from "@/components/charts/HorizontalBarchart";
 import interpolate from "color-interpolate";
 import DoughnutChart from "@/components/charts/DoughnutChart";
 import RevitProjectInfo from "@/components/RevitProjectInfo";
+import {TOKEN} from "@/speckleUtils";
+
+function debounce(callback, wait) {
+  let timerId;
+  return (...args) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => {
+      callback(...args);
+    }, wait);
+  };
+}
 
 export default {
   name: "RevitDashboard",
@@ -112,11 +123,9 @@ export default {
         var children = []
         // Iterate through the families
         Object.entries(val).forEach(([childKey, childVal]) => {
-          console.log("child", childKey, childVal)
           var grandChilds = []
           // Iterate through available types
           Object.entries(childVal).forEach(([grandKey, grandVal]) => {
-            console.log("grand", grandKey, grandVal)
             grandChilds.push({
               id: id++,
               name: grandKey
@@ -215,10 +224,13 @@ export default {
   methods: {
     async processStreamObjects() {
       this.$emit("loaded", false)
+      this.$emit("progress", 0)
+
       this.loader = new ObjectLoader({
         serverUrl: process.env.VUE_APP_SERVER_URL,
         streamId: this.stream.id,
-        objectId: this.objectId
+        objectId: this.objectId,
+        token: localStorage.getItem(TOKEN)
       })
 
       function shouldIgnore(obj) {
@@ -237,11 +249,17 @@ export default {
       const availableLevels = {}
       var totalViews = 0
       var totalElements = 0
+      var total = 0
+      var count = 0
+      var d = debounce(()=> {
 
+      },10)
       for await (let obj of this.loader.getObjectIterator()) {
-        // if (!total) total = obj.totalChildrenCount
-        // console.log(`Progress: ${count++}/${total}`)
-
+        if (!total) total = obj.totalChildrenCount
+        var progress = Math.floor((count * 100) / total)
+        console.log(`Progress: ${progress}`, count, total)
+        this.$emit("progress", progress)
+        count++
         // Get all types in the document
         if (obj.speckle_type.endsWith("ElementType")) {
           typeCategoryMap[obj.type] = obj.category // Map type to category
@@ -307,6 +325,7 @@ export default {
       this.totals.levels = Object.keys(this.availableLevels).length
       this.totals.views = totalViews
       this.totals.elements = totalElements
+
       this.$emit("loaded", true)
     }
   }
