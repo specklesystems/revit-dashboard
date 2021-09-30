@@ -4,7 +4,7 @@
     <h1>Welcome to the Speckle Revit Dashboard App</h1>
     <p>This app allows you to analyse the data sent from Revit to a Speckle server.</p>
     <v-alert type="info" text color="primary">
-      Check out <a href="https://speckle.guide/dev/apps" target="_blank">the tutorial</a>!
+      Check out the <a href="https://speckle.systems/blog" target="_blank">blog post</a> for more info!
     </v-alert>
     <p class="grey--text">Please log in to access you Speckle data.</p>
   </v-container>
