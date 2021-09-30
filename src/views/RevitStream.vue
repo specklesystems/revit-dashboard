@@ -7,26 +7,16 @@
       <v-progress-circular color="primary" indeterminate></v-progress-circular>
       <p class="body-2 mt-2 primary--text">Processing your data...</p>
     </div>
-
-    <v-container v-if="refObj && isRevitCommit" v-show="!loading">
-      <v-row>
-        <v-col>
-          <revit-project-info v-if="!loading" :info="refObj['@Project Information']" :stream="stream"/>
-        </v-col>
-      </v-row>
-      <v-row>
-        <!--        <v-col class="col-12">-->
-        <!--          <revit-categories v-if="!loading" :revit-data="refObj" @legend-clicked="onLegendClick"></revit-categories>-->
-        <!--        </v-col>-->
-        <v-col class="col-12">
-          <object-loader-test v-if="selectedCommit" :stream-id="streamId" :object-id="selectedCommit.referencedObject"
-                              @loaded="loading = !$event" @legend-clicked="onLegendClick"></object-loader-test>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col></v-col>
-      </v-row>
-    </v-container>
+    <div v-if="refObj && isRevitCommit" v-show="!loading">
+      <object-loader-test v-if="selectedCommit"
+                          :stream-id="streamId"
+                          :object-id="selectedCommit.referencedObject"
+                          @loaded="loading = !$event"
+                          @legend-clicked="onLegendClick"
+                          :info="refObj['@Project Information']"
+                          :stream="stream">
+      </object-loader-test>
+    </div>
 
   </v-container>
 </template>
@@ -39,7 +29,7 @@ import Chart from "chart.js"
 
 export default {
   name: "RevitStream",
-  components: {ObjectLoaderTest, RevitProjectInfo},
+  components: {ObjectLoaderTest},
   data() {
     return {
       stream: null,
@@ -97,27 +87,6 @@ export default {
       this.selectedCommit = res.data.stream.commits.items[0]
       this.stream = res.data.stream
     },
-    async getPreviewImage(angle) {
-      angle = angle || 0
-      let previewUrl = `${this.serverUrl}/preview/${this.streamId}/objects/${this.selectedCommit.referencedObject}/${angle}`
-
-      let token = undefined
-      try {
-        token = localStorage.getItem('AuthToken')
-      } catch (e) {
-        console.warn('Sanboxed mode, only public streams will fetch properly.')
-      }
-      const res = await fetch(previewUrl, {
-        mode: "cors",
-        headers: token ? {
-          Authorization: `Bearer ${token}`,
-          'Access-Control-Allow-Origin': '*'
-        } : {'Access-Control-Allow-Origin': '*'}
-      })
-      const blob = await res.blob()
-      const imgUrl = URL.createObjectURL(blob)
-      if (this.$refs.cover) this.$refs.cover.style.backgroundImage = `url('${imgUrl}')`
-    },
   },
   watch: {
     streamId: {
@@ -126,10 +95,8 @@ export default {
       }
     },
     selectedCommit: {
-      handler: async function (val, oldVal) {
-        var obj = await getStreamObject(this.stream.id, this.selectedCommit.referencedObject)
-        this.refObj = obj
-        //this.getPreviewImage(0)
+      handler: async function () {
+        this.refObj = await getStreamObject(this.stream.id, this.selectedCommit.referencedObject)
       }
     }
   }

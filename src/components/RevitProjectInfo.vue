@@ -11,7 +11,7 @@
           You are viewing the latest commit on this stream
         </v-card-subtitle>
         <v-card-text class="d-flex flex-column flex-fill">
-          <div style="min-height: 200px; height:100%">
+          <div style="min-height: 180px; height:100%">
             <renderer :object-urls="objectUrl"/>
           </div>
         </v-card-text>
@@ -32,9 +32,9 @@
             {{ projectInfo.status }}
           </v-card-subtitle>
           <v-row wrap dense class="d-flex align-center justify-center ma-3">
-            <v-col v-for="(item, key) in overviewData" :key="key" class="col-4 d-flex flex-column justify-center align-center flex-fill">
+            <v-col v-for="(item, key) in totals" :key="key" class="col-4 d-flex flex-column justify-center align-center flex-fill">
               <div class="d-flex flex-column justify-center align-center flex-fill">
-                <p class="text-h3 mb-0 primary--text">{{ item }}</p>
+                <p class="text-h2 mb-0 primary--text">{{ item }}</p>
                 <p class="pb-0 ma-0 primary--text caption">{{ key.toUpperCase() }}</p>
               </div>
             </v-col>
@@ -54,20 +54,11 @@ import Renderer from "@/components/Renderer";
 export default {
   name: "RevitProjectInfo",
   components: {Renderer},
-  props: ["info", "stream"],
+  props: ["info", "stream", "totals"],
   data() {
     return {
       projectInfo: null,
       serverUrl: process.env.VUE_APP_SERVER_URL,
-      overviewData: {
-        "families": 23,
-        "objects": 21,
-        "views": 4,
-        "more": 44,
-        "and..": 452,
-        "xx": 434
-
-      }
     }
   },
   computed: {

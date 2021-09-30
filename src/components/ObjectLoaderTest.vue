@@ -1,8 +1,13 @@
 <template>
-  <v-container>
+  <div>
     <v-row>
       <v-col>
-        <v-card max-height="500px">
+        <revit-project-info :info="info" :stream="stream" :totals="totals"/>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-card max-height="500px" outlined>
           <v-card-title>Objects by category</v-card-title>
           <v-card-text>
             <doughnut-chart ref="doughnut" v-if="objsByCategoryData" :chart-data="objsByCategoryData"
@@ -13,7 +18,7 @@
     </v-row>
     <v-row>
       <v-col class="col-6">
-        <v-card max-height="500px">
+        <v-card max-height="500px" outlined>
           <v-card-title>Elements Per Level/Category</v-card-title>
           <v-card-text>
             <horizontal-barchart v-if="objsByLevelData" :chart-data="objsByLevelData"
@@ -22,30 +27,18 @@
         </v-card>
       </v-col>
       <v-col class="col-6">
-        <v-card max-height="500px">
+        <v-card max-height="500px" outlined>
           <v-card-title>Available Families and Types</v-card-title>
+          <v-card-subtitle>
+            <v-text-field dense clearable prepend-icon="mdi-filter" placeholder="Filter all family types" v-model="typeFilter"></v-text-field>
+          </v-card-subtitle>
           <v-card-text>
-            <v-expansion-panels>
-              <v-expansion-panel
-                  v-for="(item,key) in availableFamTypes"
-                  :key="key"
-              >
-                <v-expansion-panel-header>
-                  {{ key }}
-                </v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <ul>
-                    <li v-for="(count, type) in item" :key="type">{{ type }}: {{ count }}</li>
-                  </ul>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
+            <v-treeview dense :items="famTypeTree" :search="typeFilter"></v-treeview>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
-  </v-container>
-
+  </div>
 </template>
 
 <script>
@@ -53,13 +46,15 @@ import ObjectLoader from '@speckle/objectloader'
 import HorizontalBarchart from "@/components/charts/HorizontalBarchart";
 import interpolate from "color-interpolate";
 import DoughnutChart from "@/components/charts/DoughnutChart";
+import RevitProjectInfo from "@/components/RevitProjectInfo";
 
 export default {
   name: "ObjectLoaderTest",
-  components: {DoughnutChart, HorizontalBarchart},
-  props: ["streamId", "objectId", "revitData"],
+  components: {RevitProjectInfo, DoughnutChart, HorizontalBarchart},
+  props: ["streamId", "objectId", "revitData", "info", "stream"],
   data() {
     return {
+      typeFilter: "",
       loader: null,
       objsPerLevel: null,
       colorRange: interpolate(["#047EFB", "#4caf50"]),
@@ -91,36 +86,55 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
         legend: {
-          position: 'right',
+          position: 'left',
           onClick: (e, legendItem) => {
-            1
-            console.log("legend item clicked", e, legendItem, this.$refs.doughnut.$data._chart)
             this.$emit("legend-clicked", e, legendItem)
           }
         },
         pieceLabel: {
-          // mode 'label', 'value' or 'percentage', default is 'percentage'
           mode: 'value',
-
-          // precision for percentage, default is 0
           precision: 0,
-
-          // font size, default is defaultFontSize
           fontSize: 18,
-
-          // font color, default is '#fff'
           fontColor: '#fff',
-
-          // font style, default is defaultFontStyle
           fontStyle: 'bold',
-
-          // font family, default is defaultFontFamily
-          fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
         }
       },
     }
   },
   computed: {
+    famTypeTree() {
+      if(!this.availableFamTypes) return []
+      var id = 0;
+      var items = []
+      // Iterate through the categories
+      Object.entries(this.availableFamTypes).forEach(([key, val]) => {
+        var children = []
+        // Iterate through the families
+        Object.entries(val).forEach(([childKey, childVal]) => {
+          console.log("child", childKey, childVal)
+          var grandChilds = []
+          // Iterate through available types
+          Object.entries(childVal).forEach(([grandKey, grandVal]) => {
+            console.log("grand", grandKey, grandVal)
+            grandChilds.push({
+              id: id++,
+              name: grandKey
+            })
+          })
+          children.push({
+            id: id++,
+            name: childKey,
+            children: grandChilds
+          })
+        })
+        items.push({
+          id: id++,
+          name: key,
+          children: children
+        })
+      })
+      return items
+    },
     objsByLevelData() {
       // Fast exit if no object has been set yet
       if (!this.objsPerLevel) return null
@@ -202,13 +216,14 @@ export default {
       this.$emit("loaded", false)
       this.loader = new ObjectLoader({
         serverUrl: process.env.VUE_APP_SERVER_URL,
-        streamId: this.streamId,
+        streamId: this.stream.id,
         objectId: this.objectId
       })
 
       function shouldIgnore(obj) {
         return obj.speckle_type.startsWith("Objects.Geometry") ||
             obj.speckle_type.endsWith("DataChunk") ||
+            obj.speckle_type.endsWith("GridLine") ||
             obj.speckle_type.endsWith("ElementType") ||
             obj.speckle_type === "Base" ||
             obj.speckle_type.endsWith("ProjectInfo")
@@ -247,6 +262,8 @@ export default {
         var lvl = obj.level?.name || "No level"
         if (lvl !== "No level") {
           this.availableLevels[lvl] = obj.level
+        } else {
+          console.log("found level-less object", obj.speckle_type)
         }
         if (!objectsPerLevel[cat])
           objectsPerLevel[cat] = {}
@@ -261,7 +278,6 @@ export default {
         var cat = typeCategoryMap[fam]
         if (!catsPerLevel[cat]) catsPerLevel[cat] = {}
         Object.keys(value).forEach(levelKey => {
-          console.log(levelKey)
           if (!catsPerLevel[cat][levelKey]) catsPerLevel[cat][levelKey] = {}
           catsPerLevel[cat][levelKey] = {...catsPerLevel[cat][levelKey], ...objectsPerLevel[fam][levelKey]}
         })
