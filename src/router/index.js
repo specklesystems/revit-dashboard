@@ -13,7 +13,18 @@ const routes = [
     name: 'Home',
     component: Home,
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
+      title: 'Speckle Revit Dashboard',
+      metaTags: [
+        {
+          name: 'description',
+          content: 'The speckle Revit Dashboard homepage'
+        },
+        {
+          property: 'og:description',
+          content: 'The speckle Revit Dashboard homepage'
+        }
+      ]
     }
   },
   {
@@ -21,7 +32,8 @@ const routes = [
     name: 'Login',
     component: WelcomeView,
     meta: {
-      requiresNoAuth: true
+      requiresNoAuth: true,
+      title: "Login | Speckle Revit Dashboard"
     }
   },
   {
@@ -29,7 +41,9 @@ const routes = [
     name: 'Streams',
     component: RevitStream,
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
+      title: "Stream | Speckle Revit Dashboard"
+
     }
   }
 ]
@@ -41,6 +55,9 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  if(to.meta.title){
+    document.title = to.meta.title
+  }
   if (to.query.access_code) {
     // If the route contains an access code, exchange it
     try {
