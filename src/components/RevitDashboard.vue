@@ -18,7 +18,7 @@
     </v-row>
     <v-row>
       <v-col class="col-6">
-        <v-card max-height="500px" outlined>
+        <v-card max-height="500px" min-height="500px" outlined>
           <v-card-title>Elements Per Level/Category</v-card-title>
           <v-card-text>
             <horizontal-barchart v-if="objsByLevelData" :chart-data="objsByLevelData"
@@ -27,10 +27,11 @@
         </v-card>
       </v-col>
       <v-col class="col-6">
-        <v-card max-height="500px" outlined>
+        <v-card max-height="500px" min-height="500px" outlined>
           <v-card-title>Available Families and Types</v-card-title>
           <v-card-subtitle>
-            <v-text-field dense clearable prepend-icon="mdi-filter" placeholder="Filter all family types" v-model="typeFilter"></v-text-field>
+            <v-text-field dense clearable prepend-icon="mdi-filter" placeholder="Filter all family types"
+                          v-model="typeFilter"></v-text-field>
           </v-card-subtitle>
           <v-card-text>
             <v-treeview dense :items="famTypeTree" :search="typeFilter"></v-treeview>
@@ -49,7 +50,7 @@ import DoughnutChart from "@/components/charts/DoughnutChart";
 import RevitProjectInfo from "@/components/RevitProjectInfo";
 
 export default {
-  name: "ObjectLoaderTest",
+  name: "RevitDashboard",
   components: {RevitProjectInfo, DoughnutChart, HorizontalBarchart},
   props: ["streamId", "objectId", "revitData", "info", "stream"],
   data() {
@@ -103,7 +104,7 @@ export default {
   },
   computed: {
     famTypeTree() {
-      if(!this.availableFamTypes) return []
+      if (!this.availableFamTypes) return []
       var id = 0;
       var items = []
       // Iterate through the categories
@@ -229,9 +230,11 @@ export default {
             obj.speckle_type.endsWith("ProjectInfo")
       }
 
+      // Initialize placeholders
       const typeCategoryMap = {}
       const objectsPerLevel = {}
       const availableCategoriesAndTypes = {}
+      const availableLevels = {}
       var totalViews = 0
       var totalElements = 0
 
@@ -239,39 +242,54 @@ export default {
         // if (!total) total = obj.totalChildrenCount
         // console.log(`Progress: ${count++}/${total}`)
 
+        // Get all types in the document
         if (obj.speckle_type.endsWith("ElementType")) {
-          typeCategoryMap[obj.type] = obj.category
-          if (!availableCategoriesAndTypes[obj.category]) availableCategoriesAndTypes[obj.category] = {}
-          if (!availableCategoriesAndTypes[obj.category][obj.family]) {
+          typeCategoryMap[obj.type] = obj.category // Map type to category
+
+          // Ensure structure exists
+          if (!availableCategoriesAndTypes[obj.category])
+            availableCategoriesAndTypes[obj.category] = {}
+          if (!availableCategoriesAndTypes[obj.category][obj.family])
             availableCategoriesAndTypes[obj.category][obj.family] = {}
-          }
+
+          // Assign
           availableCategoriesAndTypes[obj.category][obj.family][obj.type] = obj
           continue
         }
 
+        // Get all views in the document
         if (obj.speckle_type === "Objects.BuiltElements.View" || obj.speckle_type === "Objects.BuiltElements.View:Objects.BuiltElements.View3D") {
           totalViews++
           continue
         }
 
-        // Objects per level
+        // Should we ignore this object?
         if (shouldIgnore(obj)) continue
+
+        // Increase element count
         totalElements++
 
-        var cat = obj.type || "Other"
+        var rvtType = obj.type || "Other"
         var lvl = obj.level?.name || "No level"
-        if (lvl !== "No level") {
-          this.availableLevels[lvl] = obj.level
-        } else {
-          console.log("found level-less object", obj.speckle_type)
-        }
-        if (!objectsPerLevel[cat])
-          objectsPerLevel[cat] = {}
-        if (!objectsPerLevel[cat][lvl])
-          objectsPerLevel[cat][lvl] = {}
 
-        objectsPerLevel[cat][lvl][obj.elementId] = obj
+        // If object has level, cache it.
+        if (lvl !== "No level" && !availableLevels[lvl]) {
+          availableLevels[lvl] = obj.level
+        }
+
+        // Make sure nested structure exists
+        if (!objectsPerLevel[rvtType])
+          objectsPerLevel[rvtType] = {}
+        if (!objectsPerLevel[rvtType][lvl])
+          objectsPerLevel[rvtType][lvl] = {}
+
+        // Assign obj
+        objectsPerLevel[rvtType][lvl][obj.elementId] = obj
       }
+
+      // Load has finished, post-process data
+
+      // Organize categories per level
       var catsPerLevel = {}
       Object.keys(objectsPerLevel).forEach(fam => {
         var value = objectsPerLevel[fam]
@@ -285,6 +303,7 @@ export default {
 
       this.objsPerLevel = catsPerLevel
       this.availableFamTypes = availableCategoriesAndTypes
+      this.availableLevels = availableLevels
       this.totals.levels = Object.keys(this.availableLevels).length
       this.totals.views = totalViews
       this.totals.elements = totalElements

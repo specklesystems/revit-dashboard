@@ -1,6 +1,6 @@
 <template>
-  <v-container id="revitStream" class="d-flex fill-height align-center justify-center">
-    <div v-if="!isRevitCommit" class="d-flex justify-center align-center primary--text">
+  <v-container id="revitStream" style="width: 100%">
+    <div v-if="!isRevitCommit" class="primary--text">
       The latest commit on this stream does not come from Revit.
     </div>
     <div v-else-if="loading" class="d-flex flex-column justify-center align-center">
@@ -8,14 +8,14 @@
       <p class="body-2 mt-2 primary--text">Processing your data...</p>
     </div>
     <div v-if="refObj && isRevitCommit" v-show="!loading">
-      <object-loader-test v-if="selectedCommit"
+      <revit-dashboard v-if="selectedCommit"
                           :stream-id="streamId"
                           :object-id="selectedCommit.referencedObject"
                           @loaded="loading = !$event"
                           @legend-clicked="onLegendClick"
                           :info="refObj['@Project Information']"
                           :stream="stream">
-      </object-loader-test>
+      </revit-dashboard>
     </div>
 
   </v-container>
@@ -23,13 +23,12 @@
 
 <script>
 import {getStreamCommits, getStreamObject} from "@/speckleUtils";
-import RevitProjectInfo from "@/components/RevitProjectInfo";
-import ObjectLoaderTest from "@/components/ObjectLoaderTest";
+import RevitDashboard from "@/components/RevitDashboard";
 import Chart from "chart.js"
 
 export default {
   name: "RevitStream",
-  components: {ObjectLoaderTest},
+  components: { RevitDashboard},
   data() {
     return {
       stream: null,
