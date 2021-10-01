@@ -239,7 +239,6 @@ export default {
     }
 
     this.domElement = renderDomElement
-    this.domElement.style.display = 'inline-block'
     this.$refs.rendererparent.appendChild(renderDomElement)
 
     if (!window.__viewer) {
@@ -297,13 +296,13 @@ export default {
     },
     load() {
       if (!this.objectUrls || this.objectUrls.length === 0) return
-      this.hasLoadedModel = true
+      window.__viewer.onWindowResize()
       this.objectUrls?.forEach(url => {
         window.__viewer.loadObject(url, localStorage.getItem(TOKEN))
         window.__viewerLastLoadedUrl = url
       })
-
       this.setupEvents()
+      this.hasLoadedModel = true
     },
     unloadData() {
       window.__viewer.sceneManager.removeAllObjects()
