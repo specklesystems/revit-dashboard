@@ -45,13 +45,15 @@
       ></v-progress-linear>
 
       <v-card
+          elevation="0"
           v-show="hasLoadedModel && loadProgress >= 99"
           style="position: absolute; bottom: 0px; z-index: 2; width: 100%"
           class="pa-0 text-center transparent elevation-0 pb-3"
       >
         <v-btn-toggle class="elevation-0" style="z-index: 100">
           <v-btn
-              v-if="selectedObjects.length !== 0 && (showSelectionHelper || fullScreen)"
+              :disabled="selectedObjects.length === 0"
+              v-if="(showSelectionHelper || fullScreen)"
               small
               color="primary"
               @click="showObjectDetails = !showObjectDetails"
@@ -117,12 +119,45 @@
           </v-tooltip>
           <v-tooltip top>
             <template #activator="{ on, attrs }">
+              <v-btn small v-bind="attrs" @click="fullScreen = !fullScreen" v-on="on">
+                <v-icon small>{{ fullScreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}</v-icon>
+              </v-btn>
+            </template>
+            Full screen
+          </v-tooltip>
+          <v-tooltip top>
+            <template #activator="{ on, attrs }">
               <v-btn v-bind="attrs" small @click="showHelp = !showHelp" v-on="on">
                 <v-icon small>mdi-help</v-icon>
               </v-btn>
             </template>
             Show viewer help
           </v-tooltip>
+          <v-dialog
+              v-model="showObjectDetails"
+              width="500"
+              :fullscreen="$vuetify.breakpoint.smAndDown"
+          >
+            <v-card>
+              <v-toolbar elevation="0">
+                <v-toolbar-title>Selection Details</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="showObjectDetails = false"><v-icon>mdi-close</v-icon></v-btn>
+              </v-toolbar>
+              <v-sheet>
+                <div v-if="selectedObjects.length !== 0">
+                  <object-simple-viewer
+                      v-for="(obj, ind) in selectedObjects"
+                      :key="obj.id + ind"
+                      :value="obj"
+                      :stream-id="$route.params.id"
+                      :key-name="`Selected Object ${ind + 1}`"
+                      force-expand
+                  />
+                </div>
+              </v-sheet>
+            </v-card>
+          </v-dialog>
           <v-dialog v-model="showHelp" max-width="290">
             <v-card>
               <v-card-text class="pt-7">
@@ -158,8 +193,10 @@
 import throttle from 'lodash.throttle'
 import {Viewer} from '@speckle/viewer'
 import {TOKEN} from "@/speckleUtils";
+import ObjectSimpleViewer from "@/components/ObjectSimpleViewer";
 
 export default {
+  components: {ObjectSimpleViewer},
   props: {
     autoLoad: {
       type: Boolean,

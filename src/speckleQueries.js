@@ -52,6 +52,9 @@ export const streamSearchQuery = `
 export const streamObjectQuery = `query($streamId: String!, $objectId: String!) {
     stream(id: $streamId){
         object(id: $objectId){
+            totalChildrenCount
+            id
+            speckleType
             data
         }
     }

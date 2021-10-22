@@ -10,10 +10,8 @@
         <v-card-subtitle>
           You are viewing the latest commit on this stream
         </v-card-subtitle>
-        <v-card-text class="d-flex flex-column flex-fill">
-          <div style="min-height: 180px; height:100%">
-            <renderer :object-urls="objectUrl"/>
-          </div>
+        <v-card-text style="min-height: 180px; height:100%">
+            <renderer show-selection-helper :object-urls="objectUrl"/>
         </v-card-text>
       </v-card>
     </v-col>

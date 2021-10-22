@@ -2,7 +2,7 @@
   <v-container fill-height>
     <v-container fluid v-if="!isRevitCommit" class="d-flex flex-column justify-center primary--text">
       <v-icon color="primary">mdi-x</v-icon>
-      <p class="headline">The latest commit on this stream does not come from Revit.</p>
+      <p class="headline text-center">The latest commit on this stream does not come from Revit.</p>
       <p class="text-center">
       <v-btn link to="/" outlined color="primary"><v-icon small left>mdi-home</v-icon>Go home</v-btn>
       </p>

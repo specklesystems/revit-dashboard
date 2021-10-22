@@ -49,7 +49,7 @@
               <v-icon small>mdi-account</v-icon>
             </v-list-item-icon>
           </v-list-item>
-          <v-list-item link href="https://speckle.community" target="_blank">
+          <v-list-item link href="https://speckle.systems/tutorials/revit-dash/" target="_blank">
             <v-list-item-title>Feedback</v-list-item-title>
             <v-list-item-icon>
               <v-icon small>mdi-message-alert-outline</v-icon>
@@ -122,6 +122,6 @@ $heading-font-family: 'Space Grotesk';
   position: fixed;
   top: 4em;
   right: 2em;
-  z-index: 10;
+  z-index: 1;
 }
 </style>
