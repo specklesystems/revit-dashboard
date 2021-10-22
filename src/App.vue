@@ -19,21 +19,25 @@
 
       <v-spacer></v-spacer>
 
-      <v-tooltip bottom max-width="500" color="warning" v-if="alertAccepted">
-        <template v-slot:activator="{ on, attrs }">
+      <div>
+        <v-tooltip bottom max-width="500" color="warning" v-if="alertAccepted">
+          <template v-slot:activator="{ on, attrs }">
             <v-icon v-bind="attrs" v-on="on" class="mr-3" color="warning">mdi-alert-outline</v-icon>
-        </template>
-        <span>This app is still in <b>ALPHA</b> stage; meaning some things may not work as expected.</span>
-      </v-tooltip>
+          </template>
+          <span>This app is still in <b>ALPHA</b> stage; meaning some things may not work as expected.</span>
+        </v-tooltip>
+      </div>
 
-      <v-tooltip left>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn x-small v-bind="attrs" v-on="on" icon link href="https://speckle.community" target="_blank" class="mr-3">
-            <v-icon size="x-large">mdi-help-circle-outline</v-icon>
-          </v-btn>
-        </template>
-        <span>Have any questions? <b>Join our Community!</b></span>
-      </v-tooltip>
+      <div>
+        <v-tooltip left>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn x-small v-bind="attrs" v-on="on" icon link href="https://speckle.community" target="_blank" class="mr-3">
+              <v-icon size="x-large">mdi-help-circle-outline</v-icon>
+            </v-btn>
+          </template>
+          <span>Have any questions? <b>Join our Community!</b></span>
+        </v-tooltip>
+      </div>
 
       <v-btn
           class="ma-2"
