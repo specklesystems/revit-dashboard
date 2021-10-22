@@ -47,7 +47,7 @@
       <v-card
           elevation="0"
           v-show="hasLoadedModel && loadProgress >= 99"
-          style="position: absolute; bottom: 0px; z-index: 2; width: 100%"
+          style="position: absolute; bottom: 0; z-index: 2; width: 100%"
           class="pa-0 text-center transparent elevation-0 pb-3"
       >
         <v-btn-toggle class="elevation-0" style="z-index: 100">
@@ -235,7 +235,7 @@ export default {
   },
   computed: {
     isSmall() {
-      return this.$vuetify.breakpoint.name == 'xs' || this.$vuetify.breakpoint.name == 'sm'
+      return this.$vuetify.breakpoint.name === 'xs' || this.$vuetify.breakpoint.name === 'sm'
     },
     darkMode() {
       return this.$vuetify.theme.dark
@@ -325,7 +325,6 @@ export default {
       )
 
       window.__viewer.on('select', (objects) => {
-        // console.log(objects)
         this.selectedObjects.splice(0, this.selectedObjects.length)
         this.selectedObjects.push(...objects)
         this.$emit('selection', this.selectedObjects)
@@ -351,20 +350,6 @@ export default {
 }
 </script>
 <style>
-.top-left {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 3;
-}
-
-.top-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 3;
-}
-
 #rendererparent {
   position: relative;
   display: inline-block;

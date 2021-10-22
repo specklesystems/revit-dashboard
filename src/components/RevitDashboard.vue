@@ -22,13 +22,14 @@
       </v-col>
       <v-col lg="6" sm="12" xs="12">
         <v-card max-height="500px" min-height="500px" outlined>
-          <v-card-title>Families and Types</v-card-title>
+          <v-card-title>Families<v-badge inline :content="totals.families"></v-badge> and Types <v-badge inline :content="totals.types"></v-badge></v-card-title>
           <v-card-subtitle>
             <v-text-field dense clearable prepend-icon="mdi-filter" placeholder="Filter all family types"
                           v-model="typeFilter"></v-text-field>
           </v-card-subtitle>
           <v-card-text>
-            <v-treeview dense :items="famTypeTree" :search="typeFilter"></v-treeview>
+            <v-treeview dense :items="familyTypeTree" :search="typeFilter"></v-treeview>
+
           </v-card-text>
         </v-card>
       </v-col>
@@ -60,6 +61,7 @@ export default {
   props: ["streamId", "objectId", "revitData", "info", "stream"],
   data() {
     return {
+      familyTypeTree: [],
       typeFilter: "",
       loader: null,
       objsPerLevel: null,
@@ -69,7 +71,9 @@ export default {
       totals: {
         levels: 0,
         elements: 0,
-        views: 0
+        views: 0,
+        families: 0,
+        types: 0
       },
       options: {
         responsive: true,
@@ -108,37 +112,6 @@ export default {
     }
   },
   computed: {
-    famTypeTree() {
-      if (!this.availableFamTypes) return []
-      var id = 0;
-      var items = []
-      // Iterate through the categories
-      Object.entries(this.availableFamTypes).forEach(([key, val]) => {
-        var children = []
-        // Iterate through the families
-        Object.entries(val).forEach(([childKey, childVal]) => {
-          var grandChilds = []
-          // Iterate through available types
-          Object.entries(childVal).forEach(([grandKey, grandVal]) => {
-            grandChilds.push({
-              id: id++,
-              name: grandKey
-            })
-          })
-          children.push({
-            id: id++,
-            name: childKey,
-            children: grandChilds
-          })
-        })
-        items.push({
-          id: id++,
-          name: key,
-          children: children
-        })
-      })
-      return items
-    },
     objsByLevelData() {
       // Fast exit if no object has been set yet
       if (!this.objsPerLevel) return null
@@ -186,7 +159,7 @@ export default {
         labels.push(key)
         dataSet.backgroundColor.push(this.colorRange(count / Object.keys(this.objsPerLevel).length))
         var total = 0
-        for (const [lvlKey, lvlValue] of Object.entries(value)) {
+        for (const [_, lvlValue] of Object.entries(value)) {
           // Push category count per level to dataset data
           total += Object.keys(lvlValue).length
         }
@@ -213,9 +186,51 @@ export default {
       handler: function (val, oldVal) {
         this.processStreamObjects()
       }
+    },
+    availableFamTypes: {
+      handler: function(val, oldVal) {
+        this.familyTypeTree = this.famTypeTree();
+      }
     }
   },
   methods: {
+    famTypeTree() {
+      var totalFams = 0
+      var totalTypes = 0
+      if (!this.availableFamTypes) return []
+      var id = 0;
+      var items = []
+      // Iterate through the categories
+      Object.entries(this.availableFamTypes).forEach(([key, val]) => {
+        var children = []
+        // Iterate through the families
+        Object.entries(val).forEach(([childKey, childVal]) => {
+          var grandChilds = []
+          // Iterate through available types
+          Object.entries(childVal).forEach(([grandKey, grandVal]) => {
+            grandChilds.push({
+              id: id++,
+              name: grandKey
+            })
+            totalTypes++
+          })
+          children.push({
+            id: id++,
+            name: childKey,
+            children: grandChilds
+          })
+          totalFams++
+        })
+        items.push({
+          id: id++,
+          name: key,
+          children: children
+        })
+      })
+      this.totals.families = totalFams
+      this.totals.types = totalTypes
+      return items
+    },
     async processStreamObjects() {
       this.$emit("loaded", false)
       this.$emit("progress", 0)
@@ -251,7 +266,6 @@ export default {
       for await (let obj of this.loader.getObjectIterator()) {
         if (!total) total = obj.totalChildrenCount
         var progress = Math.floor((count * 100) / total)
-        console.log(`Progress: ${progress}`, count, total)
         this.$emit("progress", progress)
         count++
         // Get all types in the document
@@ -327,11 +341,6 @@ export default {
 </script>
 
 <style scoped>
-.scroll-box {
-  overflow: scroll;
-  padding: 1em;
-}
-
 .v-card {
   display: flex !important;
   flex-direction: column;

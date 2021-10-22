@@ -143,7 +143,6 @@ export default {
     this.localExpand = this.expand
     if(!this.localExpand){
       var res = await getObject(this.streamId,this.value.referencedId)
-      console.log("object res", res)
       delete res.data.stream.object.data.__closure
       this.object = res.data.stream.object
     }

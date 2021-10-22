@@ -18,9 +18,16 @@
       <stream-search v-if="isAuthenticated" @selected="$router.push(`/streams/${$event.id}`)"/>
 
       <v-spacer></v-spacer>
-      <v-btn icon link href="https://speckle.community" target="_blank">
-        <v-icon>mdi-help-circle-outline</v-icon>
-      </v-btn>
+
+      <v-tooltip left>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn small v-bind="attrs" v-on="on" icon link href="https://speckle.community" target="_blank" class="mr-3">
+            <v-icon>mdi-help-circle-outline</v-icon>
+          </v-btn>
+        </template>
+        <span>Have any questions? <b>Join our Community!</b></span>
+      </v-tooltip>
+
       <v-btn
           class="ma-2"
           small
@@ -69,7 +76,7 @@
       <v-alert prominent v-if="alert"  color="error" max-width="60%">
         <v-row align="center">
           <v-col class="grow white--text">
-            This app is still in <b>ALPHA</b> stage; meaning some things may not work as expected. You can provide feedback on our <a src="https://speckle.community" class="font-weight-bold white--text text-decoration-underline">Community Forum</a>
+            This app is still in <b>ALPHA</b> stage; meaning some things may not work as expected. You can provide feedback on our <a href="https://speckle.community" class="font-weight-bold white--text text-decoration-underline">Community Forum</a>
           </v-col>
           <v-col class="shrink">
             <v-btn outlined color="white" @click="alert = false">OK</v-btn>
