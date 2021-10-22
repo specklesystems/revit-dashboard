@@ -341,6 +341,11 @@ export default {
 </script>
 
 <style scoped>
+.scroll-box {
+  overflow: scroll;
+  padding: 1em;
+}
+
 .v-card {
   display: flex !important;
   flex-direction: column;
